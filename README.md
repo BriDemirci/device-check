@@ -1,53 +1,56 @@
-# Panel Termux
+# device-check
 
-Un panel con estética de terminal que te muestra **qué celular o tablet tenés y cómo está**, desde el navegador del mismo dispositivo.
+**Abrí el link en tu celular y mirá qué dispositivo tenés.** Sin instalar nada.
+
+👉 **https://bridemirci.github.io/device-check/**
+
+Una página con estética de terminal Android que detecta tu equipo desde el navegador:
 
 ```
-u0@gts4lwifi:~$ neofetch
-Dispositivo: Samsung SM-T830 (gts4lwifi)
-Android: 10 · API 29
-Chip: Qualcomm Snapdragon 835
-CPU: 4×1.90GHz + 4×2.36GHz · arm64-v8a
-Pantalla: 2560x1600 @ 60Hz · 360dpi
-Batería: 87% · salud buena
+you@sm-t830:~$ neofetch
+Dispositivo: SM-T830
+Sistema: Android 10
+Chip: Qualcomm Snapdragon 835 (probable)
+GPU: Adreno 540
+Pantalla: 2560x1600 @ 60Hz · x2.25
+Batería: 87% · cargando
 ```
 
 ## Qué muestra
 
-- **Dispositivo:** fabricante, modelo, versión de Android, parche de seguridad, chip y frecuencias de la CPU
-- **Pantalla:** resolución, frecuencia de refresco y densidad
-- **Batería** (con Termux:API): carga, salud, temperatura, corriente y ciclos (solo Android 14 o superior)
-- **RAM, almacenamiento y CPU** en vivo
-- **Procesos** de Termux ordenados por memoria, con opción de cerrarlos
-- **Wake lock** para que Android no suspenda Termux
+- **Modelo**, sistema y navegador
+- **Chip**, deducido de la GPU en celulares con Snapdragon
+- **GPU**, núcleos de CPU y RAM aproximada
+- **Pantalla**: resolución, frecuencia de refresco (Hz) y HDR
+- **Batería**: carga, si está cargando y tiempo estimado
+- **Benchmark de CPU** (un núcleo y multinúcleo), comparado contra una Galaxy Tab S4
+- Botón **SHARE** para mandar el informe por WhatsApp o donde quieras
 
-No necesita root. Solo usa la librería estándar de Python.
+Todo se calcula en tu navegador: la página no envía tus datos a ningún lado.
 
-## Instalación (en tu celular)
+### Qué depende del navegador
 
-1. Instalá **Termux** y **Termux:API** desde [F-Droid](https://f-droid.org/packages/com.termux/) o desde GitHub ([Termux](https://github.com/termux/termux-app/releases), [Termux:API](https://github.com/termux/termux-api/releases)).
-   Las dos apps tienen que venir de la **misma fuente**. La versión de Play Store no es compatible.
-2. Abrí Termux y pegá:
+| Dato | Chrome / Edge / Samsung Internet | Firefox | Safari (iPhone) |
+|---|---|---|---|
+| Modelo exacto | ✅ | ❌ | ❌ (solo "iPhone") |
+| Batería | ✅ | ❌ | ❌ |
+| RAM aproximada | ✅ (tope 8 GB) | ❌ | ❌ |
+| GPU, pantalla, benchmark | ✅ | ✅ | ✅ |
+
+Los navegadores no exponen la salud de la batería, los ciclos de carga ni el almacenamiento total del dispositivo.
+
+## Modo avanzado: con Termux
+
+Si usás [Termux](https://f-droid.org/packages/com.termux/), podés correr el servidor local. Suma datos que el navegador no puede ver:
+- RAM, almacenamiento y CPU en vivo
+- Salud, temperatura y corriente de la batería (con la app Termux:API)
+- Chip exacto y parche de seguridad
+- Lista de procesos y control del wake lock
 
 ```bash
 pkg install -y python git termux-api
-git clone https://github.com/BriDemirci/panel-tablet.git
-bash panel-tablet/iniciar.sh
+git clone https://github.com/BriDemirci/device-check.git
+bash device-check/iniciar.sh
 ```
 
-Se abre el navegador con el panel. Las próximas veces, con `bash panel-tablet/iniciar.sh` alcanza.
-
-Sin la app Termux:API anda igual, pero no muestra la batería.
-
-## Uso avanzado
-
-- Otro puerto: `PANEL_PORT=9000 bash iniciar.sh`
-- Cerrar el panel: `pkill -f server.py`
-- También funciona dentro de una distro de `proot-distro` (Ubuntu, Debian…).
-
-## Seguridad
-
-- Escucha solo en `127.0.0.1`: nadie más en tu red Wi-Fi puede verlo.
-- Las acciones (cerrar procesos, wake lock) exigen una cabecera propia, así ninguna página web externa puede dispararlas.
-- No deja cerrar la shell, `proot`, `claude` ni la app Termux.
-- No envía datos a ningún lado. La única conexión externa es la fuente tipográfica de Google Fonts; sin internet usa la fuente monoespaciada del sistema.
+El servidor escucha solo en `127.0.0.1`, y las acciones exigen una cabecera propia para que ninguna página externa pueda dispararlas.

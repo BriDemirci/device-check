@@ -15,7 +15,7 @@ from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 HOST, PORT = "127.0.0.1", int(os.environ.get("PANEL_PORT", "8765"))
-STATIC = Path(__file__).parent / "static"
+STATIC = Path(__file__).parent / "docs"
 CLK_TCK = os.sysconf("SC_CLK_TCK")
 PAGE = os.sysconf("SC_PAGE_SIZE")
 NCPU = os.cpu_count() or 1
