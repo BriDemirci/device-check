@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0f172a">
+<title>Panel Tab S4</title>
+<style>
+  :root {
+    --bg: #f4f5f7; --card: #ffffff; --text: #111827; --muted: #6b7280;
+    --line: #e5e7eb; --track: #e5e7eb; --ok: #16a34a; --warn: #d97706; --bad: #dc2626;
+    --accent: #2563eb; --accent-text: #ffffff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; --muted: #94a3b8;
+      --line: #334155; --track: #334155; --ok: #22c55e; --warn: #f59e0b; --bad: #f87171;
+      --accent: #3b82f6;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 16px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  main { max-width: 900px; margin: 0 auto; padding: 20px 16px 40px; }
+  header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+  h1 { font-size: 1.5rem; margin: 0; }
+  .estado { color: var(--muted); font-size: .9rem; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px; }
+  .card h2 { font-size: .85rem; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin: 0 0 8px; }
+  .valor { font-size: 2rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .detalle { color: var(--muted); font-size: .9rem; font-variant-numeric: tabular-nums; }
+  .barra { height: 10px; background: var(--track); border-radius: 99px; overflow: hidden; margin: 10px 0 6px; }
+  .barra > div { height: 100%; width: 0; border-radius: 99px; background: var(--ok); transition: width .4s, background .4s; }
+  .acciones { display: flex; gap: 10px; flex-wrap: wrap; margin: 16px 0; }
+  button {
+    font: inherit; font-weight: 600; min-height: 48px; padding: 0 18px; border-radius: 12px;
+    border: 1px solid var(--line); background: var(--card); color: var(--text); cursor: pointer;
+  }
+  button.primario { background: var(--accent); border-color: var(--accent); color: var(--accent-text); }
+  button:disabled { opacity: .5; }
+  table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+  th, td { text-align: left; padding: 10px 6px; border-bottom: 1px solid var(--line); }
+  th { color: var(--muted); font-size: .8rem; font-weight: 600; text-transform: uppercase; }
+  td.num, th.num { text-align: right; }
+  td .cerrar { min-height: 40px; padding: 0 12px; color: var(--bad); }
+  .nombre { word-break: break-all; }
+  .aviso { color: var(--muted); font-size: .85rem; margin-top: 10px; }
+  #toast {
+    position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); max-width: calc(100% - 32px);
+    background: var(--text); color: var(--bg); padding: 12px 18px; border-radius: 12px; opacity: 0;
+    transition: opacity .3s; pointer-events: none;
+  }
+  #toast.visible { opacity: 1; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Mi Tab S4</h1>
+    <span class="estado" id="estado">Conectando…</span>
+  </header>
+
+  <section class="grid">
+    <div class="card">
+      <h2>RAM</h2>
+      <div class="valor" id="ram-pct">–</div>
+      <div class="barra"><div id="ram-barra"></div></div>
+      <div class="detalle" id="ram-detalle"></div>
+    </div>
+    <div class="card">
+      <h2>Almacenamiento</h2>
+      <div class="valor" id="disco-pct">–</div>
+      <div class="barra"><div id="disco-barra"></div></div>
+      <div class="detalle" id="disco-detalle"></div>
+    </div>
+    <div class="card">
+      <h2>CPU (Ubuntu)</h2>
+      <div class="valor" id="cpu-pct">–</div>
+      <div class="barra"><div id="cpu-barra"></div></div>
+      <div class="detalle" id="cpu-detalle"></div>
+    </div>
+  </section>
+
+  <div class="acciones">
+    <button class="primario" id="btn-wakelock">Wake lock</button>
+    <button id="btn-actualizar">Actualizar</button>
+  </div>
+
+  <section class="card">
+    <h2>Procesos de Ubuntu</h2>
+    <table>
+      <thead><tr><th>Proceso</th><th class="num">RAM</th><th class="num">CPU</th><th></th></tr></thead>
+      <tbody id="procesos"></tbody>
+    </table>
+    <p class="aviso">Solo se pueden cerrar tus procesos. Las apps de Android no aparecen acá.</p>
+  </section>
+</main>
+<div id="toast"></div>
+
+<script>
+  const $ = id => document.getElementById(id);
+  let wakelock = null;
+
+  const tam = b => {
+    const u = ["B", "KB", "MB", "GB"]; let i = 0;
+    while (b >= 1024 && i < u.length - 1) { b /= 1024; i++; }
+    return (i >= 3 ? b.toFixed(1) : Math.round(b)) + " " + u[i];
+  };
+
+  const color = pct => pct >= 90 ? "var(--bad)" : pct >= 75 ? "var(--warn)" : "var(--ok)";
+
+  function pintar(id, pct, detalle) {
+    $(id + "-pct").textContent = Math.round(pct) + "%";
+    const barra = $(id + "-barra");
+    barra.style.width = Math.min(pct, 100) + "%";
+    barra.style.background = color(pct);
+    $(id + "-detalle").textContent = detalle;
+  }
+
+  function toast(msg) {
+    const t = $("toast");
+    t.textContent = msg; t.classList.add("visible");
+    clearTimeout(toast.timer);
+    toast.timer = setTimeout(() => t.classList.remove("visible"), 2500);
+  }
+
+  async function post(url, cuerpo) {
+    const r = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-Panel": "1" },
+      body: JSON.stringify(cuerpo),
+    });
+    return { ok: r.ok, datos: await r.json() };
+  }
+
+  function pintarWakelock() {
+    const b = $("btn-wakelock");
+    b.textContent = wakelock === true ? "Wake lock: ON" : wakelock === false ? "Wake lock: OFF" : "Activar wake lock";
+  }
+
+  async function actualizar() {
+    try {
+      const r = await fetch("/api/estado");
+      const d = await r.json();
+      const { ram, disco, cpu } = d;
+      pintar("ram", 100 * ram.usado / ram.total, `${tam(ram.usado)} de ${tam(ram.total)} · ${tam(ram.disponible)} libres`);
+      pintar("disco", 100 * disco.usado / disco.total, `${tam(disco.usado)} de ${tam(disco.total)} · ${tam(disco.libre)} libres`);
+      pintar("cpu", cpu.uso, `${cpu.nucleos} núcleos · solo procesos de Ubuntu`);
+      if (d.wakelock !== null) { wakelock = d.wakelock; pintarWakelock(); }
+
+      const filas = d.procesos.map(p => `
+        <tr>
+          <td class="nombre">${p.nombre.replace(/[<>&]/g, "")} <span class="detalle">#${p.pid}</span></td>
+          <td class="num">${tam(p.rss)}</td>
+          <td class="num">${p.cpu}%</td>
+          <td class="num">${p.cerrable ? `<button class="cerrar" data-pid="${p.pid}" data-nombre="${p.nombre.replace(/[<>&"]/g, "")}">Cerrar</button>` : ""}</td>
+        </tr>`).join("");
+      $("procesos").innerHTML = filas;
+      $("estado").textContent = "Actualizado " + new Date().toLocaleTimeString("es-AR");
+    } catch {
+      $("estado").textContent = "Sin conexión con el servidor";
+    }
+  }
+
+  $("procesos").addEventListener("click", async e => {
+    const b = e.target.closest("button.cerrar");
+    if (!b) return;
+    if (!confirm(`¿Cerrar ${b.dataset.nombre} (#${b.dataset.pid})?`)) return;
+    b.disabled = true;
+    const { ok, datos } = await post("/api/cerrar", { pid: Number(b.dataset.pid) });
+    toast(ok ? `${b.dataset.nombre} cerrado` : datos.error);
+    setTimeout(actualizar, 500);
+  });
+
+  $("btn-wakelock").addEventListener("click", async () => {
+    const { ok, datos } = await post("/api/wakelock", { activar: wakelock !== true });
+    if (ok) { wakelock = datos.wakelock; pintarWakelock(); toast(wakelock ? "Wake lock activado" : "Wake lock desactivado"); }
+    else toast("No se pudo cambiar el wake lock");
+  });
+
+  $("btn-actualizar").addEventListener("click", actualizar);
+
+  pintarWakelock();
+  actualizar();
+  setInterval(() => { if (!document.hidden) actualizar(); }, 3000);
+</script>
+</body>
+</html>
