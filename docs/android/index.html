@@ -1,0 +1,466 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0a0d0c">
+<meta name="description" content="Abrí la página y mirá qué celular tenés: modelo, chip, pantalla, batería y un benchmark. Sin instalar nada.">
+<title>device-check · Android</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0d0c; --bg-2: #111614; --line: #1f2925;
+    --text: #c9d4ce; --dim: #6b7d74; --green: #3ddc84; --cyan: #5ccfe6;
+    --amber: #ffb454; --red: #ff6b6b; --magenta: #d291ff; --blue: #73b8ff;
+    --mono: "JetBrains Mono", ui-monospace, "Droid Sans Mono", "Roboto Mono", Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  html { background: var(--bg); }
+  body {
+    margin: 0; min-height: 100vh; background: var(--bg); color: var(--text);
+    font: 14px/1.55 var(--mono); -webkit-font-smoothing: antialiased; -webkit-text-size-adjust: 100%;
+    padding-bottom: calc(64px + env(safe-area-inset-bottom));
+  }
+  /* Líneas de escaneo muy sutiles, como un monitor viejo */
+  body::before {
+    content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 5;
+    background: repeating-linear-gradient(to bottom, rgba(255,255,255,.018) 0 1px, transparent 1px 3px);
+  }
+  main { max-width: 960px; margin: 0 auto; padding: 18px 16px 24px; }
+  ::selection { background: var(--green); color: var(--bg); }
+
+  .barra-estado {
+    display: flex; justify-content: space-between; gap: 12px; color: var(--dim);
+    font-size: 12px; border-bottom: 1px dashed var(--line); padding-bottom: 8px; margin-bottom: 14px;
+  }
+  .prompt { white-space: pre-wrap; word-break: break-word; margin: 22px 0 6px; }
+  .u { color: var(--green); font-weight: 700; }
+  .p { color: var(--blue); font-weight: 700; }
+  .cursor { display: inline-block; width: .6em; height: 1.1em; background: var(--green); vertical-align: text-bottom; animation: titila 1.1s steps(1) infinite; }
+  @keyframes titila { 50% { opacity: 0; } }
+
+  .salida { white-space: pre; overflow-x: auto; margin: 0; }
+  .dim { color: var(--dim); } .ok { color: var(--green); } .warn { color: var(--amber); } .bad { color: var(--red); }
+  .cy { color: var(--cyan); }
+
+  /* neofetch */
+  .neofetch { display: flex; gap: 28px; align-items: flex-start; }
+  .robot { color: var(--green); margin: 0; line-height: 1.2; flex: none; text-shadow: 0 0 12px rgba(61,220,132,.35); }
+  .info { margin: 0; min-width: 0; white-space: pre-wrap; word-break: break-word; }
+  .info .k { color: var(--green); font-weight: 700; }
+  .paleta { display: flex; margin-top: 10px; }
+  .paleta span { width: 22px; height: 14px; }
+  @media (max-width: 640px) {
+    body { font-size: 12.5px; }
+    .neofetch { flex-direction: column; gap: 10px; }
+    .robot { font-size: 11px; }
+  }
+
+  .medidor { display: grid; grid-template-columns: 7ch 1fr; column-gap: 1ch; }
+  .medidor .nom { color: var(--cyan); font-weight: 700; }
+  .medidor .val { white-space: pre; overflow: hidden; }
+
+  .accion {
+    font-family: var(--mono); font-weight: 700; font-size: inherit; color: var(--green); background: none;
+    border: 1px solid var(--green); padding: 10px 14px; cursor: pointer; margin-top: 4px;
+  }
+  .accion:hover, .accion:focus-visible { background: var(--green); color: var(--bg); outline: none; }
+  .accion:disabled { opacity: .5; cursor: wait; }
+
+  table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+  th { color: var(--bg); background: var(--green); font-weight: 700; text-align: left; padding: 0 1ch; }
+  td { padding: 2px 1ch; white-space: nowrap; }
+  td.nom { white-space: normal; word-break: break-all; }
+  th.n, td.n { text-align: right; }
+  tr:hover td { background: var(--bg-2); }
+  .kill { font: inherit; color: var(--red); background: none; border: 0; padding: 6px 4px; cursor: pointer; }
+  .kill:hover, .kill:focus-visible { background: var(--red); color: var(--bg); outline: none; }
+
+  .nota { border-left: 2px solid var(--amber); padding: 4px 0 4px 12px; white-space: pre-wrap; margin: 0; }
+  .pie { color: var(--dim); font-size: 12px; margin-top: 28px; border-top: 1px dashed var(--line); padding-top: 10px; }
+  .pie a { color: var(--cyan); }
+
+  /* Teclas extra al estilo Termux */
+  .teclas {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 10; background: #000;
+    border-top: 1px solid var(--line); display: flex; padding-bottom: env(safe-area-inset-bottom);
+  }
+  .teclas button {
+    flex: 1; font: 700 12px var(--mono); letter-spacing: .04em; color: var(--text); background: none;
+    border: 0; border-right: 1px solid var(--line); min-height: 52px; cursor: pointer;
+  }
+  .teclas button:last-child { border-right: 0; }
+  .teclas button:active, .teclas button.on { color: var(--bg); background: var(--green); }
+  .teclas button:focus-visible { outline: 2px solid var(--cyan); outline-offset: -2px; }
+
+  #toast {
+    position: fixed; left: 16px; right: 16px; bottom: calc(64px + env(safe-area-inset-bottom)); z-index: 11;
+    max-width: 560px; margin: 0 auto; background: var(--bg-2); border: 1px solid var(--green); color: var(--green);
+    padding: 10px 14px; opacity: 0; transform: translateY(8px); transition: .25s; pointer-events: none;
+  }
+  #toast.visible { opacity: 1; transform: none; }
+  [hidden] { display: none !important; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cursor { animation: none; } #toast { transition: none; }
+  }
+  .aviso { border: 1px solid var(--amber); color: var(--amber); padding: 8px 12px; margin-bottom: 14px; }
+  .aviso a, .versiones a { color: var(--cyan); }
+  .versiones { margin-top: 10px; }
+  .versiones a[aria-current] { color: var(--bg); background: var(--green); text-decoration: none; padding: 0 4px; }
+</style>
+<script src="../core.js"></script>
+</head>
+<body>
+<main>
+  <div class="barra-estado">
+    <span id="reloj">--:--</span>
+    <span id="modo">detectando…</span>
+  </div>
+
+  <div class="aviso" id="aviso" hidden></div>
+
+  <div class="prompt" data-cmd="neofetch"></div>
+  <section class="neofetch">
+<pre class="robot" aria-hidden="true">
+    \           /
+     \         /
+    .-'-------'-.
+   /   o     o   \
+  |               |
+  +---------------+
+ ||               ||
+ ||               ||
+ ||               ||
+  +---------------+
+     |  |   |  |
+     '--'   '--'</pre>
+    <div>
+      <pre class="info" id="info">detectando dispositivo…</pre>
+      <div class="paleta" aria-hidden="true">
+        <span style="background:#1f2925"></span><span style="background:var(--red)"></span><span style="background:var(--green)"></span><span style="background:var(--amber)"></span><span style="background:var(--blue)"></span><span style="background:var(--magenta)"></span><span style="background:var(--cyan)"></span><span style="background:var(--text)"></span>
+      </div>
+    </div>
+  </section>
+
+  <div id="sec-free" hidden>
+    <div class="prompt" data-cmd="free -h && df -h ~"></div>
+    <div id="medidores"></div>
+  </div>
+
+  <div class="prompt" data-cmd="battery --status"></div>
+  <div id="bateria"><span class="dim">leyendo batería…</span></div>
+
+  <div class="prompt" id="p-bench" data-cmd="bench --cpu"></div>
+  <div id="bench">
+    <pre class="salida dim">Mide cuántas operaciones por segundo hace tu CPU,
+con un núcleo y con todos a la vez.</pre>
+    <button class="accion" id="btn-bench">▶ correr benchmark (~5 s)</button>
+  </div>
+
+  <div id="sec-top" hidden>
+    <div class="prompt" id="p-top" data-cmd="top -o RES"></div>
+    <table>
+      <thead><tr><th class="n">PID</th><th>PROCESO</th><th class="n">RES</th><th class="n">CPU%</th><th></th></tr></thead>
+      <tbody id="procesos"></tbody>
+    </table>
+  </div>
+
+  <div class="prompt" data-cmd=""><span class="cursor"></span></div>
+
+  <footer class="pie">
+    Todo se calcula en tu navegador: esta página no envía tus datos a ningún lado.
+    Código: <a href="https://github.com/BriDemirci/device-check">github.com/BriDemirci/device-check</a>
+    <div class="versiones" id="versiones"></div>
+  </footer>
+</main>
+
+<nav class="teclas" id="teclas" aria-label="Acciones"></nav>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+const $ = id => document.getElementById(id);
+const { esc } = DC;
+
+let disp = {};          // detección del navegador (core.js)
+let servidor = null;    // /api/dispositivo cuando corre el servidor de Termux
+let estado = null;      // último /api/estado
+let bateriaNav = null;  // BatteryManager del navegador
+let bench = null;
+let wakelock = null, pausado = false;
+
+const tam = b => {
+  const u = ["B", "K", "M", "G", "T"]; let i = 0;
+  while (b >= 1024 && i < u.length - 1) { b /= 1024; i++; }
+  return (i >= 3 ? b.toFixed(1) : Math.round(b)) + u[i];
+};
+const clase = pct => pct >= 90 ? "bad" : pct >= 75 ? "warn" : "ok";
+const anchoBarra = () => matchMedia("(max-width: 640px)").matches ? 16 : 32;
+function barra(pct, cls = clase(pct), ancho = anchoBarra()) {
+  const llenos = Math.round(Math.max(0, Math.min(pct, 100)) / 100 * ancho);
+  return `<span class="dim">[</span><span class="${cls}">${"█".repeat(llenos)}</span><span class="dim">${"░".repeat(ancho - llenos)}]</span>`;
+}
+
+/* ---------- Servidor local opcional (Termux) ---------- */
+
+async function buscarServidor() {
+  if (!["localhost", "127.0.0.1"].includes(location.hostname)) return null;
+  try {
+    const ctl = new AbortController();
+    setTimeout(() => ctl.abort(), 1500);
+    const r = await fetch("/api/dispositivo", { signal: ctl.signal, cache: "no-store" });
+    return r.ok ? await r.json() : null;
+  } catch { return null; }
+}
+
+/* ---------- Pintado ---------- */
+
+function host() {
+  const base = servidor?.codigo || disp.modelo || disp.tipo || "device";
+  return base.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 24) || "device";
+}
+
+function pintarPrompts() {
+  const user = servidor?.usuario || "you";
+  document.querySelectorAll(".prompt").forEach(p => {
+    const cursor = p.querySelector(".cursor");
+    p.innerHTML = `<span class="u">${esc(user)}@${esc(host())}</span><span class="dim">:</span><span class="p">~</span><span class="dim">$</span> ${esc(p.dataset.cmd)}`;
+    if (cursor) p.append(" ", cursor);
+  });
+}
+
+// Filas del navegador (core.js), reemplazadas por datos más precisos si corre el servidor de Termux
+function filasInfo() {
+  const filas = DC.filas(disp, bateriaNav);
+  const s = servidor, e = estado;
+  if (!s) return filas;
+  const reemplazos = {
+    "Dispositivo": `${s.fabricante} ${s.modelo}${s.codigo ? ` (${s.codigo})` : ""}`,
+    "Sistema": `Android ${s.android} · API ${s.sdk}`,
+    "Chip": s.chip,
+    "CPU": s.frecuencias?.length ? `${s.frecuencias.map(f => `${f.nucleos}×${f.ghz.toFixed(2)}GHz`).join(" + ")} · ${s.abi}` : null,
+    "Memoria": e ? `${tam(e.ram.usado)} / ${tam(e.ram.total)}` : null,
+  };
+  const b = batActual();
+  if (b?.fuente === "termux") reemplazos["Batería"] = `${b.porcentaje}% · salud ${b.salud.toLowerCase()}`;
+  const salida = filas.map(([k, v]) => [k, reemplazos[k] || v]);
+  const i = salida.findIndex(([k]) => k === "Sistema");
+  if (s.parche) salida.splice(i + 1, 0, ["Parche seg.", s.parche]);
+  if (e) salida.splice(salida.findIndex(([k]) => k === "Memoria") + 1, 0, ["Almacen.", `${tam(e.disco.usado)} / ${tam(e.disco.total)}`]);
+  salida.push(["Entorno", s.entorno]);
+  return salida;
+}
+
+function pintarInfo() {
+  const titulo = `${servidor?.usuario || "you"}@${host()}`;
+  $("info").innerHTML =
+    `<span class="u">${esc(titulo)}</span>\n<span class="dim">${"-".repeat(titulo.length)}</span>\n` +
+    filasInfo().map(([k, v]) => `<span class="k">${k}</span><span class="dim">:</span> ${esc(v)}`).join("\n") +
+    (disp.notas?.length ? "\n" + disp.notas.map(n => `<span class="dim"># ${esc(n)}</span>`).join("\n") : "");
+}
+
+// Batería: Termux:API si hay servidor (trae salud y temperatura); si no, la API del navegador
+function batActual() {
+  if (estado?.bateria) return { ...estado.bateria, fuente: "termux" };
+  const b = DC.infoBateria(bateriaNav);
+  return b && { ...b, fuente: "navegador" };
+}
+
+function pintarBateria() {
+  const b = batActual();
+  if (!b) {
+    $("bateria").innerHTML = `<pre class="nota"><span class="warn">tu navegador no permite leer la batería</span>
+<span class="dim">Chrome, Edge, Samsung Internet y Opera sí lo permiten; Safari y Firefox no.</span></pre>`;
+    return;
+  }
+  const celdas = 10, llenas = Math.round(b.porcentaje / 10), cls = clase(100 - b.porcentaje);
+  const icono = `<span class="dim">╭${"─".repeat(celdas)}╮</span>\n<span class="dim">│</span><span class="${cls}">${"▮".repeat(llenas)}</span><span class="dim">${"▯".repeat(celdas - llenas)}│▌</span>\n<span class="dim">╰${"─".repeat(celdas)}╯</span>`;
+  const lineas = [["carga", `<span class="${cls}">${b.porcentaje}%</span> · ${esc(b.estado.toLowerCase())}`]];
+  if (b.fuente === "termux") {
+    const tc = b.temperatura >= 45 ? "bad" : b.temperatura >= 38 ? "warn" : "ok";
+    lineas.push(
+      ["salud", `<span class="${b.salud_ok ? "ok" : "bad"}">${esc(b.salud)}</span>`],
+      ["ciclos", b.ciclos != null ? b.ciclos : '<span class="dim">n/d (Android 14+)</span>'],
+      ["temp", b.temperatura != null ? `<span class="${tc}">${b.temperatura.toFixed(1)}°C</span>` : "?"],
+      ["corriente", b.corriente_ma != null ? `${b.corriente_ma} mA` : "?"],
+      ["conexión", esc(b.conexion)],
+    );
+  } else {
+    if (b.tiempoTexto) lineas.push(["tiempo", b.tiempoTexto]);
+    lineas.push(["salud", '<span class="dim">el navegador no la informa</span>']);
+  }
+  $("bateria").innerHTML = `<pre class="salida">${icono}</pre><pre class="salida">${lineas.map(([k, v]) => `<span class="cy">${k.padEnd(10)}</span>${v}`).join("\n")}</pre>`;
+}
+
+function pintarMedidores() {
+  const e = estado;
+  const filas = [
+    ["RAM", 100 * e.ram.usado / e.ram.total, `${tam(e.ram.usado)}/${tam(e.ram.total)}`],
+    ["DISCO", 100 * e.disco.usado / e.disco.total, `${tam(e.disco.libre)} libres`],
+    ["CPU", e.cpu.uso, `${e.cpu.nucleos} núcleos`],
+  ];
+  $("medidores").innerHTML = filas.map(([n, pct, extra]) =>
+    `<div class="medidor"><span class="nom">${n}</span><span class="val">${barra(pct)} <span class="${clase(pct)}">${String(Math.round(pct)).padStart(3)}%</span> <span class="dim">${esc(extra)}</span></span></div>`
+  ).join("");
+}
+
+function pintarProcesos() {
+  $("procesos").innerHTML = estado.procesos.map(p => `<tr>
+    <td class="n dim">${p.pid}</td>
+    <td class="nom">${esc(p.nombre)}</td>
+    <td class="n">${tam(p.rss)}</td>
+    <td class="n ${p.cpu >= 50 ? "bad" : p.cpu >= 15 ? "warn" : ""}">${p.cpu.toFixed(1)}</td>
+    <td class="n">${p.cerrable ? `<button class="kill" data-pid="${p.pid}" data-nombre="${esc(p.nombre)}">kill</button>` : ""}</td>
+  </tr>`).join("");
+}
+
+function pintarTodo() {
+  pintarInfo();
+  pintarBateria();
+  if (estado) { pintarMedidores(); pintarProcesos(); }
+}
+
+function pintarVersiones() {
+  $("versiones").innerHTML = "versiones: " + DC.versiones("android").map(v =>
+    `<a href="${v.url}"${v.actual ? ' aria-current="page"' : ""}>${v.clave}</a>`).join(" · ");
+  if (disp.clave && disp.clave !== "android") {
+    const otra = DC.versiones("android").find(v => v.clave === disp.clave);
+    $("aviso").innerHTML = `# estás en ${esc(disp.so)} → <a href="${otra.url}">ver la versión ${esc(otra.nombre)}</a>`;
+    $("aviso").hidden = false;
+  }
+}
+
+/* ---------- Benchmark ---------- */
+
+async function correrBench() {
+  const btn = $("btn-bench");
+  btn.disabled = true;
+  const salida = $("bench").querySelector("pre");
+  salida.className = "salida";
+  try {
+    bench = await DC.benchmark((etapa, n, parcial) => {
+      salida.innerHTML = etapa === 1
+        ? `<span class="cy">[1/2]</span> un núcleo… <span class="cursor"></span>`
+        : `<span class="cy">[1/2]</span> un núcleo… <span class="ok">${parcial.single}</span>\n<span class="cy">[2/2]</span> ${n} núcleos… <span class="cursor"></span>`;
+    });
+    pintarBench();
+    btn.textContent = "↻ volver a correr";
+  } catch {
+    salida.innerHTML = `<span class="bad">no se pudo correr el benchmark en este navegador</span>`;
+  }
+  btn.disabled = false;
+}
+
+function pintarBench() {
+  const r = bench, ref = DC.REFERENCIA;
+  const fila = (etiqueta, valor, max, cls) => `${etiqueta.padEnd(14)}${barra(100 * valor / max, cls, anchoBarra() - 4)} ${String(valor).padStart(6)}`;
+  const bloque = (titulo, tuyo, suyo, pct) => {
+    const max = Math.max(tuyo, suyo) * 1.05;
+    const comp = pct >= 0 ? `<span class="ok">+${pct}%</span>` : `<span class="warn">${pct}%</span>`;
+    return `<span class="cy">${titulo}</span>  ${comp} <span class="dim">vs ${ref.nombre}</span>\n${fila("tu " + disp.tipo, tuyo, max, "ok")}\n<span class="dim">${fila(ref.nombre, suyo, max, "dim")}</span>`;
+  };
+  $("bench").querySelector("pre").innerHTML =
+    `${bloque("un núcleo", r.single, ref.single, r.vsSingle)}\n\n${bloque("multinúcleo", r.multi, ref.multi, r.vsMulti)}\n\n<span class="dim">Más es mejor. Puede variar si el equipo está caliente o en ahorro de batería.</span>`;
+}
+
+/* ---------- Acciones ---------- */
+
+function toast(msg, error = false) {
+  const t = $("toast");
+  t.textContent = (error ? "✗ " : "✓ ") + msg;
+  t.style.borderColor = t.style.color = error ? "var(--red)" : "var(--green)";
+  t.classList.add("visible");
+  clearTimeout(toast.timer);
+  toast.timer = setTimeout(() => t.classList.remove("visible"), 2600);
+}
+
+async function compartir() {
+  const texto = `device-check\n${filasInfo().map(([k, v]) => `${k}: ${v}`).join("\n")}` +
+    (bench ? `\nBenchmark: ${bench.single} (1 núcleo) · ${bench.multi} (multi)` : "") + `\n${DC.URL_PUBLICA}`;
+  const r = await DC.compartir(texto);
+  if (r === "copiado") toast("informe copiado al portapapeles");
+  else if (r === "error") toast("no se pudo compartir", true);
+}
+
+async function post(url, cuerpo) {
+  const r = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json", "X-Panel": "1" }, body: JSON.stringify(cuerpo) });
+  return { ok: r.ok, datos: await r.json() };
+}
+
+function armarTeclas() {
+  const teclas = servidor
+    ? [["WAKE", toggleWake, "Mantener la CPU despierta"], ["BENCH", irBench, "Benchmark"], ["↻ REF", () => { actualizar(); toast("actualizado"); }, "Actualizar"], ["PAUSE", togglePausa, "Pausar actualización"], ["PS", () => $("p-top").scrollIntoView({ behavior: "smooth" }), "Procesos"]]
+    : [["BENCH", irBench, "Benchmark"], ["SHARE", compartir, "Compartir informe"], ["↻ REF", () => location.reload(), "Volver a detectar"], ["↑ TOP", () => scrollTo({ top: 0, behavior: "smooth" }), "Ir arriba"]];
+  $("teclas").replaceChildren(...teclas.map(([txt, fn, titulo]) => {
+    const b = document.createElement("button");
+    b.textContent = txt; b.title = titulo; b.dataset.tecla = txt; b.onclick = fn;
+    return b;
+  }));
+}
+
+function irBench() {
+  $("p-bench").scrollIntoView({ behavior: "smooth" });
+  if (!$("btn-bench").disabled) correrBench();
+}
+
+async function toggleWake() {
+  const { ok, datos } = await post("/api/wakelock", { activar: wakelock !== true });
+  if (ok) { wakelock = datos.wakelock; pintarWake(); toast(wakelock ? "wake lock activado" : "wake lock liberado"); }
+  else toast("no se pudo cambiar el wake lock", true);
+}
+function pintarWake() {
+  const b = document.querySelector('[data-tecla="WAKE"]');
+  if (b) { b.classList.toggle("on", wakelock === true); b.setAttribute("aria-pressed", wakelock === true); }
+}
+function togglePausa() {
+  pausado = !pausado;
+  document.querySelector('[data-tecla="PAUSE"]').classList.toggle("on", pausado);
+}
+
+async function actualizar() {
+  try {
+    estado = await (await fetch("/api/estado", { cache: "no-store" })).json();
+    if (estado.wakelock !== null) { wakelock = estado.wakelock; pintarWake(); }
+    pintarTodo();
+    $("modo").innerHTML = `<span class="ok">●</span> en vivo · termux`;
+  } catch {
+    $("modo").innerHTML = `<span class="bad">●</span> sin conexión con termux`;
+  }
+}
+
+$("procesos").addEventListener("click", async ev => {
+  const b = ev.target.closest(".kill");
+  if (!b || !confirm(`kill ${b.dataset.pid} (${b.dataset.nombre})?`)) return;
+  b.disabled = true;
+  const { ok, datos } = await post("/api/cerrar", { pid: Number(b.dataset.pid) });
+  ok ? toast(`${b.dataset.nombre} cerrado`) : toast(datos.error, true);
+  setTimeout(actualizar, 500);
+});
+$("btn-bench").addEventListener("click", correrBench);
+addEventListener("resize", () => { estado && pintarMedidores(); bench && pintarBench(); });
+
+const reloj = () => $("reloj").textContent = new Date().toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
+reloj(); setInterval(reloj, 1000);
+
+(async () => {
+  [disp, servidor, bateriaNav] = await Promise.all([DC.detectar(), buscarServidor(), DC.bateria(() => pintarTodo())]);
+  pintarPrompts();
+  pintarVersiones();
+  armarTeclas();
+  if (servidor) {
+    $("sec-free").hidden = false;
+    $("sec-top").hidden = false;
+    await actualizar();
+    setInterval(() => { if (!pausado && !document.hidden) actualizar(); }, 3000);
+  } else {
+    $("modo").innerHTML = `<span class="ok">●</span> ${esc(disp.tipo)} detectado`;
+  }
+  pintarTodo();
+  disp.hz = await DC.medirHz();
+  pintarInfo();
+})();
+</script>
+</body>
+</html>

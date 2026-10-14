@@ -1,0 +1,1101 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#dbe9f8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#071430" media="(prefers-color-scheme: dark)">
+<meta name="color-scheme" content="light dark">
+<meta name="description" content="Abrí la página y mirá qué compu tenés: sistema, chip, gráficos, pantalla, batería y un benchmark. Sin instalar nada.">
+<title>device-check · Windows</title>
+<style>
+:root {
+  --font: "Segoe UI Variable", "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --mono: "Cascadia Code", "Cascadia Mono", Consolas, ui-monospace, "SF Mono", Menlo, monospace;
+
+  --accent: #0078d4;
+  --accent-hover: #106ebe;
+  --accent-text: #ffffff;
+  --accent-soft: rgba(0, 120, 212, .14);
+
+  --text: #1a1a1a;
+  --text-2: #5d5d5d;
+  --text-3: #8a8a8a;
+
+  --bg: #d6e6f8;
+  --wall-1: #e9f2fc;
+  --wall-2: #cfe2f8;
+  --wall-3: #b5d3f3;
+  --petal-a: rgba(64, 150, 240, .55);
+  --petal-b: rgba(0, 95, 200, .75);
+  --petal-c: rgba(160, 210, 255, .9);
+  --bloom-core: rgba(255, 255, 255, .85);
+  --blend: normal;
+
+  --mica: rgba(243, 246, 251, .68);
+  --acrylic: rgba(249, 250, 252, .62);
+  --acrylic-strong: rgba(245, 247, 251, .84);
+  --card-hover: rgba(255, 255, 255, .72);
+  --subtle: rgba(0, 0, 0, .045);
+  --subtle-2: rgba(0, 0, 0, .08);
+  --stroke: rgba(0, 0, 0, .08);
+  --stroke-strong: rgba(0, 0, 0, .14);
+  --highlight: rgba(255, 255, 255, .7);
+  --track: rgba(0, 0, 0, .1);
+  --danger: #c42b1c;
+  --ok: #0f7b0f;
+
+  --shadow-win: 0 0 0 1px rgba(0,0,0,.04), 0 2px 6px rgba(0,0,0,.06), 0 18px 48px rgba(10,40,90,.18);
+  --shadow-card: 0 1px 2px rgba(0,0,0,.05), 0 6px 18px rgba(10,40,90,.08);
+  --shadow-fly: 0 0 0 1px rgba(0,0,0,.05), 0 8px 16px rgba(0,0,0,.08), 0 32px 64px rgba(10,40,90,.22);
+
+  /* La terminal es oscura en los dos temas, como Windows Terminal por defecto */
+  --term-bg: rgba(14, 18, 30, .8);
+  --term-bar: rgba(30, 34, 48, .72);
+  --term-tab: rgba(52, 58, 76, .85);
+  --term-text: #cccccc;
+  --term-dim: #8b93a7;
+  --term-key: #61d6f6;
+  --term-ok: #16c60c;
+  --term-warn: #f9f1a5;
+  --term-err: #ff6b6b;
+  --term-com: #6a9955;
+  --term-prompt: #e6e6e6;
+  --term-stroke: rgba(255, 255, 255, .08);
+
+  --r-win: 8px;
+  --r-card: 12px;
+  --r-ctl: 4px;
+  --taskbar-h: 48px;
+  --safe-b: env(safe-area-inset-bottom, 0px);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --accent: #4cc2ff;
+    --accent-hover: #62cdff;
+    --accent-text: #001a2e;
+    --accent-soft: rgba(76, 194, 255, .16);
+
+    --text: #ffffff;
+    --text-2: #c5cad3;
+    --text-3: #8d94a1;
+
+    --bg: #040b1d;
+    --wall-1: #020713;
+    --wall-2: #051634;
+    --wall-3: #0a2a63;
+    --petal-a: rgba(10, 70, 180, .7);
+    --petal-b: rgba(30, 130, 240, .75);
+    --petal-c: rgba(90, 200, 255, .6);
+    --bloom-core: rgba(70, 170, 255, .35);
+    --blend: screen;
+
+    --mica: rgba(28, 32, 44, .62);
+    --acrylic: rgba(36, 40, 54, .55);
+    --acrylic-strong: rgba(32, 36, 48, .82);
+    --card-hover: rgba(48, 54, 70, .6);
+    --subtle: rgba(255, 255, 255, .055);
+    --subtle-2: rgba(255, 255, 255, .09);
+    --stroke: rgba(255, 255, 255, .08);
+    --stroke-strong: rgba(255, 255, 255, .14);
+    --highlight: rgba(255, 255, 255, .06);
+    --track: rgba(255, 255, 255, .12);
+    --danger: #ff99a4;
+    --ok: #6ccb5f;
+
+    --shadow-win: 0 0 0 1px rgba(0,0,0,.35), 0 2px 6px rgba(0,0,0,.3), 0 24px 64px rgba(0,0,0,.5);
+    --shadow-card: 0 1px 2px rgba(0,0,0,.25), 0 8px 24px rgba(0,0,0,.28);
+    --shadow-fly: 0 0 0 1px rgba(0,0,0,.4), 0 8px 16px rgba(0,0,0,.3), 0 32px 64px rgba(0,0,0,.55);
+
+    --term-bg: rgba(12, 14, 22, .74);
+    --term-bar: rgba(24, 27, 38, .6);
+  }
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--bg);
+  color: var(--text);
+  font: 14px/1.45 var(--font);
+  overflow-x: hidden;
+  padding-bottom: calc(var(--taskbar-h) + var(--safe-b) + 8px);
+  -webkit-font-smoothing: antialiased;
+}
+button, a { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: var(--r-ctl); }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
+
+/* ---------- Wallpaper "bloom" ---------- */
+.wall {
+  position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none;
+  background:
+    radial-gradient(60% 45% at 52% 62%, var(--bloom-core), transparent 70%),
+    linear-gradient(165deg, var(--wall-1) 0%, var(--wall-2) 50%, var(--wall-3) 100%);
+}
+.wall .petalo {
+  position: absolute; left: 50%; top: 64%;
+  width: 62vmax; height: 20vmax; margin-top: -10vmax;
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  transform-origin: 0 50%;
+  transform: rotate(var(--r)) translateX(2vmax);
+  background: linear-gradient(90deg, transparent 0%, var(--petal-a) 30%, var(--petal-b) 70%, var(--petal-c) 100%);
+  filter: blur(34px);
+  opacity: var(--o, .8);
+  mix-blend-mode: var(--blend);
+  animation: respirar 14s ease-in-out infinite alternate;
+  animation-delay: var(--d, 0s);
+}
+.wall .onda {
+  position: absolute; left: -20vmax; right: -20vmax; bottom: -30vmax; height: 55vmax;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, var(--petal-b), transparent);
+  filter: blur(60px); opacity: .45; mix-blend-mode: var(--blend);
+}
+@keyframes respirar {
+  from { transform: rotate(var(--r)) translateX(2vmax) scale(1); }
+  to   { transform: rotate(calc(var(--r) + 4deg)) translateX(3vmax) scale(1.06); }
+}
+
+/* ---------- Materiales ---------- */
+.acrylic {
+  background: var(--acrylic);
+  -webkit-backdrop-filter: blur(40px) saturate(170%);
+  backdrop-filter: blur(40px) saturate(170%);
+  border: 1px solid var(--stroke);
+  box-shadow: inset 0 1px 0 var(--highlight), var(--shadow-card);
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  :root { --acrylic: var(--acrylic-strong); --mica: var(--acrylic-strong); --term-bg: rgba(14, 18, 30, .96); }
+}
+
+/* ---------- Escritorio ---------- */
+.desk {
+  max-width: 1320px; margin: 0 auto;
+  padding: 24px 16px 16px;
+  display: grid; gap: 16px;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+}
+.cabecera { grid-column: 1 / -1; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; padding: 0 2px; }
+.cabecera h1 { margin: 0; font-size: 28px; font-weight: 600; letter-spacing: -.01em; }
+.cabecera p { margin: 0; color: var(--text-2); }
+@media (min-width: 1000px) {
+  .desk { grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); padding: 32px 24px 24px; gap: 20px; }
+  .desk.max .term { grid-column: 1 / -1; }
+}
+
+/* ---------- Windows Terminal ---------- */
+.term {
+  border-radius: var(--r-win);
+  background: var(--term-bg);
+  -webkit-backdrop-filter: blur(36px) saturate(150%);
+  backdrop-filter: blur(36px) saturate(150%);
+  border: 1px solid var(--term-stroke);
+  box-shadow: var(--shadow-win);
+  overflow: hidden;
+  color: var(--term-text);
+  min-width: 0;
+  scroll-margin-top: 16px;
+}
+.term:focus { outline: none; }
+.term:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.titlebar {
+  display: flex; align-items: stretch; height: 40px;
+  background: var(--term-bar);
+  border-bottom: 1px solid var(--term-stroke);
+  user-select: none; -webkit-user-select: none;
+}
+.tabs { display: flex; align-items: flex-end; gap: 2px; padding: 0 0 0 8px; min-width: 0; flex: 1; }
+.tab {
+  display: flex; align-items: center; gap: 8px;
+  height: 32px; padding: 0 6px 0 10px;
+  min-width: 0; max-width: 220px; flex: 0 1 220px;
+  background: var(--term-tab); color: #fff;
+  border-radius: 8px 8px 0 0;
+  border: 1px solid var(--term-stroke); border-bottom: 0;
+  font-size: 12px;
+}
+.tab .nombre { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tab svg { flex: none; }
+.ibtn {
+  display: grid; place-items: center; flex: none;
+  width: 28px; height: 28px; padding: 0;
+  border: 0; border-radius: var(--r-ctl);
+  background: transparent; color: #d6d6d6;
+}
+.ibtn:hover { background: rgba(255,255,255,.08); }
+.ibtn:active { background: rgba(255,255,255,.05); color: #aaa; }
+.tab .ibtn { width: 22px; height: 22px; }
+.tabs > .ibtn { align-self: center; }
+.wbtns { display: flex; flex: none; }
+.wbtn {
+  width: 46px; border: 0; padding: 0; background: transparent; color: #e8e8e8;
+  display: grid; place-items: center; border-radius: 0;
+}
+.wbtn:hover { background: rgba(255,255,255,.08); }
+.wbtn.cerrar:hover { background: #c42b1c; color: #fff; }
+.wbtn:focus-visible { outline-offset: -2px; border-radius: 0; }
+
+.consola {
+  font: 13px/1.5 var(--mono);
+  padding: 14px 16px 18px;
+  overflow-wrap: anywhere;
+  min-height: 320px;
+}
+.consola p, .consola div { margin: 0; }
+.bloque { margin-bottom: 14px; }
+.prompt { color: var(--term-prompt); }
+.prompt .ps { color: var(--term-prompt); }
+.prompt .cmd { color: #f9f1a5; }
+.prompt .arg { color: #9aa3b5; }
+.k { color: var(--term-key); font-weight: 600; }
+.dim { color: var(--term-dim); }
+.com { color: var(--term-com); }
+.okc { color: var(--term-ok); }
+.warnc { color: var(--term-warn); }
+.err { color: var(--term-err); }
+
+.ff { display: flex; gap: 24px; align-items: flex-start; margin-top: 10px; }
+.logo { margin: 0; font: inherit; line-height: 1.02; letter-spacing: 0; white-space: pre; flex: none; font-size: 12px; }
+.logo .q1 { color: #6fd0ff; } .logo .q2 { color: #3aa8ff; }
+.logo .q3 { color: #1f86f0; } .logo .q4 { color: #0a63c9; }
+.info { min-width: 0; flex: 1; }
+.info .fila { padding-left: 2ch; text-indent: -2ch; }
+.paleta { display: flex; flex-wrap: wrap; margin-top: 10px; }
+.paleta span { width: 3ch; height: 1.25em; }
+.paleta .salto { flex-basis: 100%; height: 0; width: 0; }
+
+.lista .fila { display: grid; grid-template-columns: 9ch minmax(0, 1fr); }
+.tbar {
+  display: inline-block; vertical-align: -1px;
+  width: 16ch; max-width: 100%; height: 10px;
+  background: rgba(255,255,255,.1); border-radius: 2px; overflow: hidden;
+}
+.tbar i { display: block; height: 100%; background: linear-gradient(90deg, #0a63c9, #61d6f6); }
+.tbar.ref i { background: #767676; }
+.tbar.ind i { width: 35%; animation: ind 1.2s ease-in-out infinite; }
+@keyframes ind { from { transform: translateX(-100%); } to { transform: translateX(290%); } }
+.benchrow { display: grid; grid-template-columns: 13ch auto minmax(0, 1fr); gap: 0 1.5ch; align-items: center; }
+.benchrow .num { text-align: right; }
+.tlink {
+  background: none; border: 0; padding: 0 .3ch; margin: 0;
+  font: inherit; color: var(--term-key); text-decoration: underline; text-underline-offset: 3px;
+}
+.tlink:hover { color: #fff; }
+.tlink:disabled { color: var(--term-dim); text-decoration: none; cursor: default; }
+.cursor {
+  display: inline-block; width: .6em; height: 1.1em; vertical-align: -.2em;
+  background: #e6e6e6; margin-left: 2px;
+  animation: parpadeo 1.06s steps(1) infinite;
+}
+@keyframes parpadeo { 50% { opacity: 0; } }
+.spin { display: inline-block; width: 1ch; }
+
+@media (max-width: 620px) {
+  .ff { flex-direction: column; gap: 12px; }
+  .logo { font-size: 9px; }
+}
+@media (max-width: 420px) {
+  .consola { font-size: 12px; padding: 12px 12px 16px; }
+  .wbtn { width: 38px; }
+  .tabs > .mas { display: none; }
+  .benchrow { grid-template-columns: 11ch auto minmax(0, 1fr); }
+  .tbar { width: 10ch; }
+}
+
+/* ---------- Widgets ---------- */
+.widgets {
+  min-width: 0;
+  border-radius: var(--r-card);
+  padding: 16px;
+  background: var(--mica);
+  -webkit-backdrop-filter: blur(50px) saturate(180%);
+  backdrop-filter: blur(50px) saturate(180%);
+  border: 1px solid var(--stroke);
+  box-shadow: inset 0 1px 0 var(--highlight), var(--shadow-win);
+  scroll-margin-top: 16px;
+}
+.widgets:focus { outline: none; }
+.widgets:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.widgets > header { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 0 2px 12px; }
+.widgets h2 { margin: 0; font-size: 14px; font-weight: 600; }
+.widgets .hora-grande { color: var(--text-2); font-size: 13px; font-variant-numeric: tabular-nums; }
+.grilla { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr)); }
+.widget {
+  border-radius: var(--r-card);
+  padding: 14px 16px 16px;
+  min-width: 0;
+  transition: background-color .2s;
+}
+.widget:hover { background: var(--card-hover); }
+.widget.ancho { grid-column: 1 / -1; }
+.widget h3 { margin: 0 0 10px; display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; color: var(--text-2); }
+.widget h3 svg { color: var(--accent); flex: none; }
+.dato-grande { font-size: 26px; font-weight: 600; line-height: 1.15; letter-spacing: -.01em; overflow-wrap: anywhere; }
+.dato-medio { font-size: 16px; font-weight: 600; line-height: 1.3; overflow-wrap: anywhere; }
+.sub { color: var(--text-2); font-size: 13px; }
+.kv { margin: 10px 0 0; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 12px; font-size: 13px; }
+.kv dt { color: var(--text-2); }
+.kv dd { margin: 0; text-align: right; overflow-wrap: anywhere; font-weight: 500; }
+.chip-tag {
+  display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 11px; font-weight: 600;
+  background: var(--accent-soft); color: var(--accent); vertical-align: 2px;
+}
+
+.bat { display: flex; align-items: center; gap: 16px; }
+.anillo { width: 84px; height: 84px; flex: none; position: relative; }
+.anillo svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.anillo .pista { stroke: var(--track); }
+.anillo .valor { stroke: var(--accent); transition: stroke-dasharray .6s ease; }
+.anillo.bajo .valor { stroke: var(--danger); }
+.anillo.carga .valor { stroke: var(--ok); }
+.anillo .centro { position: absolute; inset: 0; display: grid; place-items: center; font-weight: 600; font-size: 18px; }
+.anillo .centro svg { transform: none; width: 28px; height: 28px; color: var(--accent); }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 32px; padding: 5px 14px;
+  border-radius: var(--r-ctl);
+  border: 1px solid var(--stroke-strong);
+  background: var(--subtle); color: var(--text);
+  font-size: 14px; font-weight: 500;
+  transition: background-color .15s, opacity .15s;
+}
+.btn:hover { background: var(--subtle-2); }
+.btn:disabled { opacity: .55; cursor: default; }
+.btn.acento {
+  background: var(--accent); color: var(--accent-text);
+  border-color: rgba(0,0,0,.08);
+  box-shadow: inset 0 -1px 0 rgba(0,0,0,.18);
+}
+.btn.acento:hover:not(:disabled) { background: var(--accent-hover); }
+.bench-acciones { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 4px; }
+.progreso { height: 3px; border-radius: 3px; background: var(--track); overflow: hidden; margin: 12px 0 4px; }
+.progreso i { display: block; width: 35%; height: 100%; border-radius: 3px; background: var(--accent); animation: ind 1.3s ease-in-out infinite; }
+.medidas { display: grid; gap: 12px; margin-top: 12px; }
+.medida .titulo { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; }
+.medida .titulo b { font-variant-numeric: tabular-nums; }
+.barra { height: 8px; border-radius: 4px; background: var(--track); overflow: hidden; margin-top: 4px; }
+.barra i { display: block; height: 100%; border-radius: 4px; background: var(--accent); transition: width .6s ease; }
+.barra.ref { height: 4px; }
+.barra.ref i { background: var(--text-3); }
+.vs { font-size: 12px; color: var(--text-2); margin-top: 3px; }
+.vs .mas { color: var(--ok); font-weight: 600; }
+.vs .menos { color: var(--danger); font-weight: 600; }
+
+/* ---------- Pie ---------- */
+.pie {
+  grid-column: 1 / -1; text-align: center; color: var(--text-2); font-size: 12px;
+  padding: 8px 8px 4px;
+}
+.pie p { margin: 2px 0; }
+.pie a { color: var(--accent); }
+
+/* ---------- Barra de tareas ---------- */
+.taskbar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
+  height: calc(var(--taskbar-h) + var(--safe-b));
+  padding: 0 12px var(--safe-b);
+  display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center;
+  background: var(--acrylic-strong);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  backdrop-filter: blur(40px) saturate(180%);
+  border-top: 1px solid var(--stroke);
+}
+.tb-centro { grid-column: 2; display: flex; gap: 4px; }
+.tb-btn {
+  position: relative; width: 40px; height: 40px; padding: 0;
+  display: grid; place-items: center;
+  border: 1px solid transparent; border-radius: var(--r-ctl);
+  background: transparent; color: var(--text);
+  transition: background-color .15s;
+}
+.tb-btn:hover, .tb-btn[aria-expanded="true"] { background: var(--subtle-2); border-color: var(--stroke); }
+.tb-btn:active svg { transform: scale(.86); }
+.tb-btn svg { transition: transform .15s; }
+.tb-btn.activo::after {
+  content: ""; position: absolute; bottom: 1px; left: 50%; width: 6px; height: 3px; margin-left: -3px;
+  border-radius: 2px; background: var(--text-3);
+}
+.tb-btn.activo.foco::after { width: 16px; margin-left: -8px; background: var(--accent); }
+.bandeja { grid-column: 3; justify-self: end; display: flex; align-items: center; gap: 4px; min-width: 0; }
+.iconos-bandeja {
+  display: flex; align-items: center; gap: 10px; padding: 6px 8px; border-radius: var(--r-ctl);
+}
+.reloj { text-align: right; font-size: 12px; line-height: 1.3; padding: 4px 8px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+@media (max-width: 400px) {
+  .taskbar { padding-left: 6px; padding-right: 6px; }
+  .tb-centro { gap: 2px; }
+  .iconos-bandeja { gap: 6px; padding: 6px 4px; }
+  .iconos-bandeja .red { display: none; }
+  .reloj { padding: 4px 4px; font-size: 11px; }
+}
+
+/* ---------- Menú Inicio ---------- */
+.inicio {
+  position: fixed; z-index: 40;
+  left: 50%; bottom: calc(var(--taskbar-h) + var(--safe-b) + 12px);
+  width: min(600px, calc(100vw - 32px));
+  max-height: calc(100dvh - var(--taskbar-h) - var(--safe-b) - 40px);
+  overflow: auto;
+  transform: translateX(-50%);
+  border-radius: var(--r-win);
+  background: var(--acrylic-strong);
+  -webkit-backdrop-filter: blur(60px) saturate(180%);
+  backdrop-filter: blur(60px) saturate(180%);
+  border: 1px solid var(--stroke);
+  box-shadow: inset 0 1px 0 var(--highlight), var(--shadow-fly);
+  animation: subir .22s cubic-bezier(.1, .9, .2, 1);
+}
+.inicio[hidden] { display: none; }
+@keyframes subir { from { opacity: 0; transform: translate(-50%, 24px); } to { opacity: 1; transform: translate(-50%, 0); } }
+.inicio .cuerpo { padding: 24px 28px 16px; }
+.inicio h2 { margin: 0 0 10px; font-size: 14px; font-weight: 600; }
+.inicio .seccion + .seccion { margin-top: 20px; }
+.tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; }
+.tile {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: 12px 4px 10px; border-radius: var(--r-ctl);
+  text-decoration: none; text-align: center; font-size: 12px;
+  border: 1px solid transparent; background: transparent; color: var(--text);
+}
+.tile:hover { background: var(--subtle-2); border-color: var(--stroke); }
+.tile .ico { width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center; color: #fff; }
+.tile[aria-current="page"] { background: var(--accent-soft); }
+.tile .actual { font-size: 10px; color: var(--accent); font-weight: 600; margin-top: -4px; }
+.acciones { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; }
+.inicio .pie-menu {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  padding: 12px 28px; border-top: 1px solid var(--stroke);
+  background: var(--subtle);
+}
+.usuario { display: flex; align-items: center; gap: 10px; font-size: 13px; min-width: 0; }
+.avatar { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; background: var(--accent); color: var(--accent-text); font-weight: 600; flex: none; }
+@media (max-width: 480px) {
+  .inicio .cuerpo { padding: 18px 14px 12px; }
+  .inicio .pie-menu { padding: 10px 14px; }
+  .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* ---------- Toasts ---------- */
+.toasts {
+  position: fixed; z-index: 50;
+  right: 16px; bottom: calc(var(--taskbar-h) + var(--safe-b) + 12px);
+  width: min(364px, calc(100vw - 32px));
+  display: flex; flex-direction: column; gap: 8px; align-items: stretch;
+  pointer-events: none;
+}
+.toast {
+  pointer-events: auto;
+  position: relative;
+  border-radius: var(--r-win);
+  padding: 14px 44px 14px 16px;
+  background: var(--acrylic-strong);
+  -webkit-backdrop-filter: blur(50px) saturate(180%);
+  backdrop-filter: blur(50px) saturate(180%);
+  border: 1px solid var(--stroke);
+  box-shadow: inset 0 1px 0 var(--highlight), var(--shadow-fly);
+  animation: entrar .28s cubic-bezier(.1, .9, .2, 1);
+}
+.toast.saliendo { animation: salir .2s ease-in forwards; }
+@keyframes entrar { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: none; } }
+@keyframes salir { to { opacity: 0; transform: translateX(40px); } }
+.toast .app { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-2); margin-bottom: 6px; }
+.toast p { margin: 0; font-size: 14px; }
+.toast .acciones-toast { margin-top: 12px; display: flex; gap: 8px; }
+.toast .acciones-toast .btn { flex: 1; text-decoration: none; }
+.toast .x { position: absolute; top: 8px; right: 8px; }
+.toast .x.ibtn { color: var(--text-2); }
+.toast .x.ibtn:hover { background: var(--subtle-2); }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  .tbar.ind i, .progreso i { width: 100%; opacity: .6; }
+}
+</style>
+</head>
+<body>
+
+<div class="wall" aria-hidden="true">
+  <span class="onda"></span>
+  <span class="petalo" style="--r:-172deg; --o:.55; --d:-2s"></span>
+  <span class="petalo" style="--r:-145deg; --o:.75; --d:-5s"></span>
+  <span class="petalo" style="--r:-118deg; --o:.85; --d:-8s"></span>
+  <span class="petalo" style="--r:-90deg;  --o:.9;  --d:-1s"></span>
+  <span class="petalo" style="--r:-62deg;  --o:.85; --d:-6s"></span>
+  <span class="petalo" style="--r:-35deg;  --o:.75; --d:-3s"></span>
+  <span class="petalo" style="--r:-8deg;   --o:.55; --d:-9s"></span>
+</div>
+
+<main class="desk" id="escritorio">
+  <div class="cabecera">
+    <h1>device-check</h1>
+    <p>Mirá qué compu tenés, sin instalar nada.</p>
+  </div>
+
+  <section class="term" id="terminal" tabindex="-1" aria-label="Windows Terminal con los datos de tu equipo">
+    <div class="titlebar">
+      <div class="tabs">
+        <div class="tab">
+          <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><rect x="1" y="2" width="14" height="12" rx="2.5" fill="#2671be"/><path d="M4.5 5.5 7.3 8 4.5 10.5" stroke="#fff" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.5 10.6h3" stroke="#fff" stroke-width="1.4" stroke-linecap="round"/></svg>
+          <span class="nombre">PowerShell</span>
+          <button class="ibtn" type="button" data-broma="pestana" aria-label="Cerrar pestaña">
+            <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M1 1l8 8M9 1 1 9" stroke="currentColor" stroke-width="1.1"/></svg>
+          </button>
+        </div>
+        <button class="ibtn" type="button" data-broma="nueva" aria-label="Nueva pestaña">
+          <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="1.1"/></svg>
+        </button>
+        <button class="ibtn mas" type="button" data-broma="perfiles" aria-label="Abrir otro perfil">
+          <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5" stroke="currentColor" stroke-width="1.1" fill="none"/></svg>
+        </button>
+      </div>
+      <div class="wbtns">
+        <button class="wbtn" type="button" data-broma="minimizar" aria-label="Minimizar">
+          <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M0 5.5h10" stroke="currentColor"/></svg>
+        </button>
+        <button class="wbtn" type="button" id="maximizar" aria-label="Maximizar" aria-pressed="false">
+          <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><rect x=".5" y=".5" width="9" height="9" rx="1.5" fill="none" stroke="currentColor"/></svg>
+        </button>
+        <button class="wbtn cerrar" type="button" data-broma="cerrar" aria-label="Cerrar">
+          <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M.5.5l9 9M9.5.5l-9 9" stroke="currentColor"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="consola" id="consola">
+      <div class="bloque dim">PowerShell 7 · device-check<br>Todo lo que ves acá lo calcula tu navegador.</div>
+      <div class="bloque">
+        <div class="prompt"><span class="ps">PS C:\Users\you&gt;</span> <span class="cmd">fastfetch</span></div>
+        <div id="t-ff"><span class="dim">Detectando tu equipo…</span></div>
+      </div>
+      <div class="bloque">
+        <div class="prompt"><span class="ps">PS C:\Users\you&gt;</span> <span class="cmd">Get-CimInstance</span> <span class="arg">Win32_Battery | Format-List</span></div>
+        <div id="t-bat"><span class="dim">Consultando…</span></div>
+      </div>
+      <div class="bloque">
+        <div class="prompt"><span class="ps">PS C:\Users\you&gt;</span> <span class="cmd">bench</span> <span class="arg">--cpu</span></div>
+        <div id="t-bench"></div>
+      </div>
+      <div class="prompt"><span class="ps">PS C:\Users\you&gt;</span><span class="cursor" aria-hidden="true"></span></div>
+    </div>
+  </section>
+
+  <aside class="widgets" id="widgets" tabindex="-1" aria-labelledby="w-titulo">
+    <header>
+      <h2 id="w-titulo">Widgets</h2>
+      <span class="hora-grande" id="w-fecha"></span>
+    </header>
+    <div class="grilla">
+      <section class="widget acrylic" aria-labelledby="wb-t">
+        <h3 id="wb-t"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><rect x="1" y="4.5" width="12" height="7" rx="1.5" fill="none" stroke="currentColor"/><rect x="2.5" y="6" width="7" height="4" rx=".5" fill="currentColor"/><path d="M14.5 6.5v3" stroke="currentColor" stroke-linecap="round"/></svg>Batería</h3>
+        <div id="w-bat"><span class="sub">Consultando…</span></div>
+      </section>
+
+      <section class="widget acrylic" aria-labelledby="wp-t">
+        <h3 id="wp-t"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><rect x="1" y="2" width="14" height="9.5" rx="1.5" fill="none" stroke="currentColor"/><path d="M5.5 14h5M8 11.5V14" stroke="currentColor" stroke-linecap="round"/></svg>Pantalla</h3>
+        <div id="w-pant"><span class="sub">Midiendo…</span></div>
+      </section>
+
+      <section class="widget acrylic" aria-labelledby="wg-t">
+        <h3 id="wg-t"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><rect x="3.5" y="3.5" width="9" height="9" rx="1.5" fill="none" stroke="currentColor"/><rect x="6" y="6" width="4" height="4" fill="currentColor"/><path d="M6 1v2.5M10 1v2.5M6 12.5V15M10 12.5V15M1 6h2.5M1 10h2.5M12.5 6H15M12.5 10H15" stroke="currentColor"/></svg>Gráficos y procesador</h3>
+        <div id="w-gpu"><span class="sub">Detectando…</span></div>
+      </section>
+
+      <section class="widget acrylic" aria-labelledby="wr-t">
+        <h3 id="wr-t"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor"/><path d="M1.5 8h13M8 1.5c-2.2 2.2-2.2 10.8 0 13M8 1.5c2.2 2.2 2.2 10.8 0 13" fill="none" stroke="currentColor"/></svg>Red e idioma</h3>
+        <div id="w-red"><span class="sub">Detectando…</span></div>
+      </section>
+
+      <section class="widget acrylic ancho" aria-labelledby="wbench-t">
+        <h3 id="wbench-t"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 12.5a6 6 0 1 1 12 0" fill="none" stroke="currentColor" stroke-linecap="round"/><path d="M8 12.5 11 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="8" cy="12.5" r="1.2" fill="currentColor"/></svg>Rendimiento</h3>
+        <div id="w-bench"></div>
+      </section>
+    </div>
+  </aside>
+
+  <footer class="pie">
+    <p>Todo se calcula en tu navegador: esta página no envía tus datos a ningún lado.</p>
+    <p>Código: <a href="https://github.com/BriDemirci/device-check">github.com/BriDemirci/device-check</a></p>
+  </footer>
+</main>
+
+<div class="inicio" id="inicio" role="dialog" aria-modal="false" aria-label="Menú Inicio" hidden>
+  <div class="cuerpo">
+    <div class="seccion">
+      <h2>Versiones de device-check</h2>
+      <div class="tiles" id="tiles"></div>
+    </div>
+    <div class="seccion">
+      <h2>Acciones</h2>
+      <div class="acciones">
+        <button class="tile" type="button" id="m-compartir">
+          <span class="ico" style="background:linear-gradient(135deg,#0078d4,#4cc2ff)"><svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><circle cx="15" cy="4.5" r="2.3" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="5" cy="10" r="2.3" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="15" cy="15.5" r="2.3" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="m7 9 6-3.3M7 11l6 3.3" stroke="currentColor" stroke-width="1.5"/></svg></span>
+          Compartir
+        </button>
+        <button class="tile" type="button" id="m-bench">
+          <span class="ico" style="background:linear-gradient(135deg,#005a9e,#0aa6e8)"><svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 15a7 7 0 1 1 14 0" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M10 15 13.5 9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+          Benchmark
+        </button>
+        <button class="tile" type="button" id="m-actualizar">
+          <span class="ico" style="background:linear-gradient(135deg,#0063b1,#2fb0ff)"><svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M16 10a6 6 0 1 1-1.8-4.3M16 3.5v3.2h-3.2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          Actualizar
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="pie-menu">
+    <div class="usuario"><span class="avatar" aria-hidden="true">Y</span><span>you</span></div>
+    <button class="ibtn" type="button" data-broma="apagar" aria-label="Apagar" style="color:var(--text);width:36px;height:36px">
+      <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5v6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M4.6 3.8a5.5 5.5 0 1 0 6.8 0" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+</div>
+
+<nav class="taskbar" aria-label="Barra de tareas">
+  <div class="tb-centro">
+    <button class="tb-btn" type="button" id="btn-inicio" aria-label="Inicio" aria-expanded="false" aria-controls="inicio">
+      <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
+        <defs><linearGradient id="gw" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4cc2ff"/><stop offset="1" stop-color="#0078d4"/></linearGradient></defs>
+        <rect x="1" y="1" width="10.5" height="10.5" rx="1" fill="url(#gw)"/><rect x="12.5" y="1" width="10.5" height="10.5" rx="1" fill="url(#gw)"/>
+        <rect x="1" y="12.5" width="10.5" height="10.5" rx="1" fill="url(#gw)"/><rect x="12.5" y="12.5" width="10.5" height="10.5" rx="1" fill="url(#gw)"/>
+      </svg>
+    </button>
+    <button class="tb-btn activo foco" type="button" id="btn-term" aria-label="Ir a la terminal">
+      <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><rect x="1.5" y="3" width="21" height="18" rx="3" fill="#1d1f27" stroke="#5b6170"/><path d="M6 9l3.5 3L6 15" stroke="#e6e6e6" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M11.5 15.2H17" stroke="#4cc2ff" stroke-width="1.7" stroke-linecap="round"/></svg>
+    </button>
+    <button class="tb-btn activo" type="button" id="btn-widgets" aria-label="Ir a los widgets">
+      <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="3" width="9" height="11" rx="2.2" fill="#0078d4"/><rect x="13" y="3" width="9" height="6" rx="2.2" fill="#4cc2ff"/><rect x="13" y="11" width="9" height="10" rx="2.2" fill="#2b88d8"/><rect x="2" y="16" width="9" height="5" rx="2.2" fill="#90d6ff"/></svg>
+    </button>
+  </div>
+  <div class="bandeja">
+    <div class="iconos-bandeja" id="bandeja-iconos">
+      <svg class="red" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M1.5 6a9.2 9.2 0 0 1 13 0M3.7 8.4a6 6 0 0 1 8.6 0M5.9 10.7a2.9 2.9 0 0 1 4.2 0" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><circle cx="8" cy="13" r="1.1" fill="currentColor"/></svg>
+      <span id="bandeja-bat" role="img" aria-label="Batería: consultando"></span>
+    </div>
+    <div class="reloj" id="reloj" aria-label="Hora y fecha"><div id="hora">--:--</div><div id="fecha"></div></div>
+  </div>
+</nav>
+
+<div class="toasts" id="toasts" role="status" aria-live="polite" aria-atomic="false"></div>
+
+<script src="../core.js"></script>
+<script>
+(() => {
+  "use strict";
+  const $ = id => document.getElementById(id);
+
+  if (!window.DC) {
+    $("t-ff").innerHTML = '<span class="err">No se pudo cargar core.js. Probá recargar la página.</span>';
+    return;
+  }
+  const { esc } = DC;
+
+  let d = null, bat = null, bench = null, corriendo = false, etapa = null, avisado = false;
+
+  /* ---------- Toasts ---------- */
+
+  function toast(texto, { accion = null, duracion = 4500, persistente = false } = {}) {
+    const t = document.createElement("div");
+    t.className = "toast";
+    t.innerHTML = `
+      <div class="app"><svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><rect x="1" y="1" width="10.5" height="10.5" fill="#0078d4"/><rect x="12.5" y="1" width="10.5" height="10.5" fill="#0078d4"/><rect x="1" y="12.5" width="10.5" height="10.5" fill="#0078d4"/><rect x="12.5" y="12.5" width="10.5" height="10.5" fill="#0078d4"/></svg>device-check</div>
+      <p>${esc(texto)}</p>
+      ${accion ? `<div class="acciones-toast"><a class="btn acento" href="${esc(accion.href)}">${esc(accion.texto)}</a></div>` : ""}
+      <button class="ibtn x" type="button" aria-label="Cerrar notificación"><svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M1 1l8 8M9 1 1 9" stroke="currentColor" stroke-width="1.1"/></svg></button>`;
+    let cerrado = false;
+    const cerrar = () => {
+      if (cerrado) return; cerrado = true;
+      if (matchMedia("(prefers-reduced-motion: reduce)").matches) { t.remove(); return; }
+      t.classList.add("saliendo");
+      setTimeout(() => t.remove(), 200);
+    };
+    t.querySelector(".x").addEventListener("click", cerrar);
+    $("toasts").appendChild(t);
+    if (!persistente) setTimeout(cerrar, duracion);
+    return cerrar;
+  }
+
+  /* ---------- Utilidades de presentación ---------- */
+
+  const pct = (v, max) => `${Math.max(2, Math.min(100, Math.round(v / max * 100)))}%`;
+  const vsTexto = v => v >= 0
+    ? `<span class="mas">${v}% más rápido</span>`
+    : `<span class="menos">${Math.abs(v)}% más lento</span>`;
+
+  function logoWindows() {
+    const ancho = 13, alto = 6, gap = "  ";
+    const fila = (a, b) => `<span class="${a}">${"█".repeat(ancho)}</span>${gap}<span class="${b}">${"█".repeat(ancho)}</span>`;
+    const arriba = Array.from({ length: alto }, () => fila("q1", "q2"));
+    const abajo = Array.from({ length: alto }, () => fila("q3", "q4"));
+    return [...arriba, "", ...abajo].join("\n");
+  }
+
+  function paleta() {
+    const normal = ["#0c0c0c", "#c50f1f", "#13a10e", "#c19c00", "#0037da", "#881798", "#3a96dd", "#cccccc"];
+    const brillo = ["#767676", "#e74856", "#16c60c", "#f9f1a5", "#3b78ff", "#b4009e", "#61d6d6", "#f2f2f2"];
+    const s = c => `<span style="background:${c}"></span>`;
+    return `<div class="paleta" aria-hidden="true">${normal.map(s).join("")}<i class="salto"></i>${brillo.map(s).join("")}</div>`;
+  }
+
+  /* ---------- Terminal ---------- */
+
+  function renderFastfetch() {
+    const filas = DC.filas(d, bat).map(([k, v]) => `<div class="fila"><span class="k">${esc(k)}</span>: ${esc(v)}</div>`).join("");
+    const notas = (d.notas || []).map(n => `<div class="com"># ${esc(n)}</div>`).join("");
+    $("t-ff").innerHTML = `
+      <div class="ff">
+        <pre class="logo" aria-hidden="true">${logoWindows()}</pre>
+        <div class="info">
+          <div><span class="k">you</span>@<span class="k">device-check</span></div>
+          <div class="dim">-------------------</div>
+          ${filas}
+          ${paleta()}
+        </div>
+      </div>
+      ${notas ? `<div style="margin-top:10px">${notas}</div>` : ""}`;
+  }
+
+  function renderBateriaTerm() {
+    const b = DC.infoBateria(bat);
+    if (!b) {
+      $("t-bat").innerHTML = `<div class="err">Get-CimInstance : Tu navegador no expone la batería.</div><div class="com"># Pasa en Firefox y Safari. En Chrome o Edge sí se ve.</div>`;
+      return;
+    }
+    if (b.sinBateria) {
+      $("t-bat").innerHTML = `<div class="lista"><div class="fila"><span class="k">Estado</span><span>: Enchufado / sin batería</span></div></div><div class="com"># Parece una compu de escritorio (o una notebook al 100 % y enchufada).</div>`;
+      return;
+    }
+    const color = b.porcentaje <= 20 && !b.cargando ? "err" : b.cargando ? "okc" : "";
+    $("t-bat").innerHTML = `<div class="lista">
+      <div class="fila"><span class="k">Carga</span><span>: <span class="${color}">${b.porcentaje} %</span> <span class="tbar" aria-hidden="true"><i style="width:${b.porcentaje}%"></i></span></span></div>
+      <div class="fila"><span class="k">Estado</span><span>: ${esc(b.estado)}</span></div>
+      <div class="fila"><span class="k">Tiempo</span><span>: ${b.tiempoTexto ? esc(b.tiempoTexto) : '<span class="dim">calculando…</span>'}</span></div>
+    </div>`;
+  }
+
+  function renderBenchTerm() {
+    const ref = DC.REFERENCIA;
+    if (corriendo) {
+      const n = etapa?.total || "?";
+      $("t-bench").innerHTML = `
+        <div>${etapa?.paso === 2 ? `<span class="okc">✓</span> 1 núcleo: ${etapa.parcial.single}<br>` : ""}<span class="warnc">Midiendo ${etapa?.paso === 2 ? `${n} núcleos a la vez` : "un núcleo"}…</span> <span class="tbar ind" aria-hidden="true"><i></i></span></div>
+        <div class="dim">No cierres ni cambies de pestaña (tarda unos 5 segundos).</div>`;
+      return;
+    }
+    if (!bench) {
+      $("t-bench").innerHTML = `<div class="dim">Mide qué tan rápido es tu procesador y lo compara con una ${esc(ref.nombre)}.</div>
+        <div>Para empezar, <button class="tlink" type="button" data-accion="bench">tocá acá</button> o usá el widget de Rendimiento.</div>`;
+      return;
+    }
+    const maxS = Math.max(bench.single, ref.single), maxM = Math.max(bench.multi, ref.multi);
+    const fila = (nombre, v, max, cls = "") => `<div class="benchrow"><span>${nombre}</span><span class="num">${v}</span><span class="tbar ${cls}" aria-hidden="true"><i style="width:${pct(v, max)}"></i></span></div>`;
+    const signo = v => v >= 0 ? `<span class="okc">+${v}%</span>` : `<span class="err">${v}%</span>`;
+    $("t-bench").innerHTML = `
+      <div class="k">1 núcleo</div>
+      ${fila("Tu equipo", bench.single, maxS)}
+      ${fila(esc(ref.nombre), ref.single, maxS, "ref")}
+      <div class="k" style="margin-top:6px">Multinúcleo (${bench.nucleos})</div>
+      ${fila("Tu equipo", bench.multi, maxM)}
+      ${fila(esc(ref.nombre), ref.multi, maxM, "ref")}
+      <div style="margin-top:6px">vs ${esc(ref.nombre)}: ${signo(bench.vsSingle)} en 1 núcleo · ${signo(bench.vsMulti)} en multinúcleo</div>
+      <div><button class="tlink" type="button" data-accion="bench">Medir otra vez</button></div>`;
+  }
+
+  /* ---------- Widgets ---------- */
+
+  function renderBateriaWidget() {
+    const b = DC.infoBateria(bat);
+    let svg, centro, clase = "", titulo, sub;
+    if (!b) {
+      titulo = "No disponible";
+      sub = "Tu navegador no expone la batería. En Chrome o Edge sí se puede ver.";
+      centro = `<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor"/><path d="M6.2 6.2a1.9 1.9 0 1 1 2.6 1.7c-.5.3-.8.6-.8 1.2v.4" fill="none" stroke="currentColor" stroke-linecap="round"/><circle cx="8" cy="11.5" r=".8" fill="currentColor"/></svg>`;
+      svg = 0;
+    } else if (b.sinBateria) {
+      titulo = "Enchufado / sin batería";
+      sub = "Parece una compu de escritorio, o una notebook cargada al 100 %.";
+      centro = `<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 1.5v3M10.5 1.5v3M3.5 4.5h9v3a4.5 4.5 0 0 1-9 0zM8 12v2.5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+      svg = 100;
+    } else {
+      titulo = `${b.estado}`;
+      sub = b.tiempoTexto ? `Se ${b.cargando ? "llena" : "termina"} en ${b.tiempoTexto.replace(/^(llena en|dura) /, "")}` : (b.cargando ? "Calculando cuánto falta…" : "Calculando cuánto dura…");
+      centro = `${b.porcentaje}%`;
+      svg = b.porcentaje;
+      clase = b.cargando ? "carga" : b.porcentaje <= 20 ? "bajo" : "";
+    }
+    $("w-bat").innerHTML = `
+      <div class="bat">
+        <div class="anillo ${clase}" role="img" aria-label="${esc(b && !b.sinBateria ? `Batería al ${b.porcentaje} %` : titulo)}">
+          <svg viewBox="0 0 100 100" aria-hidden="true">
+            <circle class="pista" cx="50" cy="50" r="42" fill="none" stroke-width="9"/>
+            <circle class="valor" cx="50" cy="50" r="42" fill="none" stroke-width="9" stroke-linecap="round" pathLength="100" stroke-dasharray="${svg} 100"${svg ? "" : ' style="display:none"'}/>
+          </svg>
+          <div class="centro" aria-hidden="true">${centro}</div>
+        </div>
+        <div style="min-width:0">
+          <div class="dato-medio">${esc(titulo)}</div>
+          <div class="sub">${esc(sub)}</div>
+        </div>
+      </div>`;
+    renderBandeja(b);
+  }
+
+  function renderBandeja(b) {
+    const el = $("bandeja-bat");
+    const nivel = b && !b.sinBateria ? b.porcentaje : b ? 100 : 0;
+    const ancho = Math.max(1, Math.round(nivel / 100 * 11));
+    const rayo = b && b.cargando && !b.sinBateria ? `<path d="M9.5 5.5 7 9h2.5L8 11.5" fill="none" style="stroke:var(--bg)" stroke-width="1.1"/>` : "";
+    el.innerHTML = b
+      ? `<svg width="20" height="16" viewBox="0 0 20 16" aria-hidden="true"><rect x="1" y="4" width="15" height="9" rx="2" fill="none" stroke="currentColor"/><rect x="3" y="6" width="${ancho}" height="5" rx=".8" fill="currentColor"/><path d="M17.5 7v3" stroke="currentColor" stroke-linecap="round"/>${rayo}</svg>`
+      : `<svg width="20" height="16" viewBox="0 0 20 16" aria-hidden="true"><rect x="1" y="4" width="15" height="9" rx="2" fill="none" stroke="currentColor" stroke-dasharray="2 2"/><path d="M17.5 7v3" stroke="currentColor" stroke-linecap="round"/></svg>`;
+    el.setAttribute("aria-label", b ? (b.sinBateria ? "Enchufado, sin batería" : `Batería al ${b.porcentaje} %, ${b.estado.toLowerCase()}`) : "Batería no disponible");
+    el.title = el.getAttribute("aria-label");
+  }
+
+  function renderPantalla() {
+    const escala = Math.round(d.dpr * 100);
+    $("w-pant").innerHTML = `
+      <div class="dato-grande">${esc(d.resolucion)}</div>
+      <div class="sub">píxeles reales</div>
+      <dl class="kv">
+        <dt>Frecuencia</dt><dd>${d.hz ? `${d.hz} Hz` : "midiendo…"}</dd>
+        <dt>Escala</dt><dd>${escala} %</dd>
+        <dt>HDR</dt><dd>${d.hdr ? "Sí" : "No"}</dd>
+        <dt>Colores</dt><dd>${esc(d.colorBits)} bits${d.gamaP3 ? " · P3" : ""}</dd>
+        <dt>Táctil</dt><dd>${d.tactil ? "Sí" : "No"}</dd>
+      </dl>`;
+  }
+
+  function renderGpu() {
+    $("w-gpu").innerHTML = `
+      <div class="dato-medio">${esc(d.gpu || "GPU no informada")}</div>
+      <div class="sub">${d.chip ? `${esc(d.chip)}${d.chipProbable ? ' <span class="chip-tag">probable</span>' : ""}` : "El chip no se pudo deducir"}</div>
+      <dl class="kv">
+        <dt>Núcleos</dt><dd>${d.nucleos ?? "?"}</dd>
+        <dt>Arquitectura</dt><dd>${esc(d.arquitectura || "no informada")}</dd>
+        <dt>Memoria</dt><dd>${esc(d.ram || "no informada")}</dd>
+      </dl>`;
+  }
+
+  function renderRed() {
+    $("w-red").innerHTML = `
+      <div class="dato-medio">${esc(d.navegador)}</div>
+      <div class="sub">${esc(d.version)}</div>
+      <dl class="kv">
+        <dt>Red</dt><dd>${esc(d.red || "no informada")}</dd>
+        <dt>Idioma</dt><dd>${esc(d.idioma)}</dd>
+        <dt>Zona</dt><dd>${esc(d.zona)}</dd>
+      </dl>`;
+  }
+
+  function renderBenchWidget() {
+    const ref = DC.REFERENCIA;
+    const boton = `<button class="btn acento" type="button" data-accion="bench"${corriendo ? " disabled" : ""}>
+      <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3.2v9.6L12.5 8z" fill="currentColor"/></svg>
+      ${corriendo ? "Midiendo…" : bench ? "Medir otra vez" : "Medir rendimiento"}</button>`;
+    const compartir = `<button class="btn" type="button" data-accion="compartir">Compartir resultados</button>`;
+    if (corriendo) {
+      $("w-bench").innerHTML = `<div class="bench-acciones">${boton}</div>
+        <div class="progreso" aria-hidden="true"><i></i></div>
+        <div class="sub">${etapa?.paso === 2 ? `Ahora con los ${etapa.total} núcleos a la vez…` : "Primero con un solo núcleo…"} Tarda unos 5 segundos.</div>`;
+      return;
+    }
+    if (!bench) {
+      $("w-bench").innerHTML = `<p class="sub" style="margin:0 0 12px">Pone a trabajar el procesador unos segundos y lo compara con una ${esc(ref.nombre)} (tablet de 2018).</p>
+        <div class="bench-acciones">${boton}${compartir}</div>`;
+      return;
+    }
+    const maxS = Math.max(bench.single, ref.single), maxM = Math.max(bench.multi, ref.multi);
+    const medida = (titulo, v, r, max, vs) => `
+      <div class="medida">
+        <div class="titulo"><span>${titulo}</span><b>${v}</b></div>
+        <div class="barra"><i style="width:${pct(v, max)}"></i></div>
+        <div class="barra ref" title="${esc(ref.nombre)}: ${r}"><i style="width:${pct(r, max)}"></i></div>
+        <div class="vs">${vsTexto(vs)} que una ${esc(ref.nombre)} (${r})</div>
+      </div>`;
+    $("w-bench").innerHTML = `
+      <div class="medidas">
+        ${medida("Un núcleo", bench.single, ref.single, maxS, bench.vsSingle)}
+        ${medida(`Todos los núcleos (${bench.nucleos})`, bench.multi, ref.multi, maxM, bench.vsMulti)}
+      </div>
+      <div class="bench-acciones" style="margin-top:14px">${boton}${compartir}</div>`;
+  }
+
+  function render() {
+    if (!d) return;
+    renderFastfetch();
+    renderBateriaTerm();
+    renderBenchTerm();
+    renderBateriaWidget();
+    renderPantalla();
+    renderGpu();
+    renderRed();
+    renderBenchWidget();
+  }
+
+  /* ---------- Acciones ---------- */
+
+  async function correrBench() {
+    if (corriendo || !d) return;
+    corriendo = true; etapa = null;
+    renderBenchTerm(); renderBenchWidget();
+    try {
+      bench = await DC.benchmark((paso, total, parcial) => {
+        etapa = { paso, total, parcial };
+        renderBenchTerm(); renderBenchWidget();
+      });
+      toast(`Listo: ${bench.vsMulti >= 0 ? `${bench.vsMulti}% más rápido` : `${Math.abs(bench.vsMulti)}% más lento`} que una ${DC.REFERENCIA.nombre} usando todos los núcleos.`);
+    } catch {
+      toast("No se pudo correr el benchmark en este navegador.");
+    } finally {
+      corriendo = false; etapa = null;
+      renderBenchTerm(); renderBenchWidget();
+      renderFastfetch();
+    }
+  }
+
+  async function compartir() {
+    if (!d) return;
+    const r = await DC.compartir(DC.informe(d, bat, bench));
+    if (r === "copiado") toast("Copiado. Pegalo donde quieras.");
+    else if (r === "compartido") toast("¡Compartido!");
+    else if (r === "error") toast("No se pudo compartir ni copiar. Probá de nuevo.");
+  }
+
+  async function cargar(manual = false) {
+    try {
+      d = await DC.detectar();
+    } catch {
+      $("t-ff").innerHTML = '<span class="err">No se pudo detectar el equipo en este navegador.</span>';
+      return;
+    }
+    render();
+    DC.medirHz().then(hz => { if (d) { d.hz = hz; renderFastfetch(); renderPantalla(); } });
+    if (manual) toast("Datos actualizados.");
+    if (!avisado && d.clave !== "windows") {
+      avisado = true;
+      const v = DC.versiones("windows").find(x => x.clave === d.clave);
+      if (v) toast(`Estás en ${d.so}. ¿Ver la versión ${v.nombre}?`, { accion: { href: v.url, texto: `Ir a la versión ${v.nombre}` }, persistente: true });
+    }
+  }
+
+  const BROMAS = {
+    cerrar: "No me cierres, que soy la página entera. Probá con Alt+F4… mejor no.",
+    minimizar: "Minimizar no: te perdés lo mejor.",
+    pestana: "Es la única pestaña. Si la cerrás, ¿qué miramos?",
+    nueva: "Con una pestaña alcanza para conocer tu equipo.",
+    perfiles: "Hoy solo hay PowerShell. Los otros perfiles están de vacaciones.",
+    apagar: "Una página web no puede apagar tu compu. Por suerte.",
+  };
+
+  document.addEventListener("click", e => {
+    const b = e.target.closest("[data-broma]");
+    if (b) { toast(BROMAS[b.dataset.broma]); return; }
+    const a = e.target.closest("[data-accion]");
+    if (a) {
+      if (a.dataset.accion === "bench") correrBench();
+      else if (a.dataset.accion === "compartir") compartir();
+    }
+  });
+
+  $("maximizar").addEventListener("click", e => {
+    const desk = $("escritorio");
+    const max = desk.classList.toggle("max");
+    e.currentTarget.setAttribute("aria-pressed", String(max));
+    e.currentTarget.setAttribute("aria-label", max ? "Restaurar" : "Maximizar");
+    if (!matchMedia("(min-width: 1000px)").matches) toast("La ventana ya ocupa todo el ancho.");
+  });
+
+  /* ---------- Menú Inicio ---------- */
+
+  const menu = $("inicio"), btnInicio = $("btn-inicio");
+  const ICONOS = {
+    android: `<svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><rect x="5" y="1.5" width="10" height="17" rx="2.2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8.5 15.5h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>`,
+    ios: `<svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><rect x="5" y="1.5" width="10" height="17" rx="2.8" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8.5 3.8h3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>`,
+    macos: `<svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><rect x="3.5" y="3.5" width="13" height="9" rx="1.4" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M1.5 15.5h17" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>`,
+    windows: `<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><rect x="1" y="1" width="10.5" height="10.5" rx="1"/><rect x="12.5" y="1" width="10.5" height="10.5" rx="1"/><rect x="1" y="12.5" width="10.5" height="10.5" rx="1"/><rect x="12.5" y="12.5" width="10.5" height="10.5" rx="1"/></svg>`,
+  };
+  const FONDOS = {
+    android: "linear-gradient(135deg,#1b8a4b,#3ddc84)", ios: "linear-gradient(135deg,#3a3a3c,#8e8e93)",
+    macos: "linear-gradient(135deg,#5e5ce6,#bf5af2)", windows: "linear-gradient(135deg,#0063b1,#4cc2ff)",
+  };
+  $("tiles").innerHTML = DC.versiones("windows").map(v => `
+    <a class="tile" href="${esc(v.url)}"${v.actual ? ' aria-current="page"' : ""}>
+      <span class="ico" style="background:${FONDOS[v.clave] || FONDOS.windows}">${ICONOS[v.clave] || ""}</span>
+      ${esc(v.nombre)}${v.actual ? '<span class="actual">Estás acá</span>' : ""}
+    </a>`).join("");
+
+  function abrirMenu() {
+    menu.hidden = false;
+    btnInicio.setAttribute("aria-expanded", "true");
+    (menu.querySelector(".tile") || menu).focus();
+  }
+  function cerrarMenu(volver = true) {
+    if (menu.hidden) return;
+    menu.hidden = true;
+    btnInicio.setAttribute("aria-expanded", "false");
+    if (volver) btnInicio.focus();
+  }
+  btnInicio.addEventListener("click", e => {
+    e.stopPropagation();
+    menu.hidden ? abrirMenu() : cerrarMenu();
+  });
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape" && !menu.hidden) { e.preventDefault(); cerrarMenu(); }
+  });
+  document.addEventListener("click", e => {
+    if (!menu.hidden && !menu.contains(e.target) && !btnInicio.contains(e.target)) cerrarMenu(false);
+  });
+  menu.addEventListener("focusout", e => {
+    if (e.relatedTarget && !menu.contains(e.relatedTarget) && e.relatedTarget !== btnInicio) cerrarMenu(false);
+  });
+  $("m-compartir").addEventListener("click", () => { cerrarMenu(false); compartir(); });
+  $("m-bench").addEventListener("click", () => {
+    cerrarMenu(false);
+    $("widgets").scrollIntoView({ block: "nearest" });
+    correrBench();
+  });
+  $("m-actualizar").addEventListener("click", () => { cerrarMenu(false); cargar(true); });
+
+  /* ---------- Íconos de la barra ---------- */
+
+  function irA(id, btn) {
+    const el = $(id);
+    el.scrollIntoView({ block: "start" });
+    el.focus({ preventScroll: true });
+    document.querySelectorAll(".tb-btn.activo").forEach(b => b.classList.toggle("foco", b === btn));
+  }
+  $("btn-term").addEventListener("click", e => irA("terminal", e.currentTarget));
+  $("btn-widgets").addEventListener("click", e => irA("widgets", e.currentTarget));
+
+  /* ---------- Reloj ---------- */
+
+  function reloj() {
+    const ahora = new Date();
+    $("hora").textContent = ahora.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
+    $("fecha").textContent = ahora.toLocaleDateString("es-AR", { day: "2-digit", month: "2-digit", year: "numeric" });
+    const largo = ahora.toLocaleDateString("es-AR", { weekday: "long", day: "numeric", month: "long" });
+    $("w-fecha").textContent = largo.charAt(0).toUpperCase() + largo.slice(1);
+    $("reloj").setAttribute("aria-label", `${$("hora").textContent}, ${largo}`);
+  }
+  reloj();
+  setInterval(reloj, 10000);
+
+  /* ---------- Inicio ---------- */
+
+  (async () => {
+    bat = await DC.bateria(() => { if (d) { renderBateriaTerm(); renderBateriaWidget(); renderFastfetch(); } });
+    await cargar();
+  })();
+})();
+</script>
+</body>
+</html>

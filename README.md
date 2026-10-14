@@ -4,22 +4,23 @@
 
 👉 **https://bridemirci.github.io/device-check/**
 
-Una página con estética de terminal Android que detecta tu equipo desde el navegador:
+La página detecta tu sistema y te abre la versión que corresponde, cada una con su estilo:
 
-```
-you@sm-t830:~$ neofetch
-Dispositivo: SM-T830
-Sistema: Android 10
-Chip: Qualcomm Snapdragon 835 (probable)
-GPU: Adreno 540
-Pantalla: 2560x1600 @ 60Hz · x2.25
-Batería: 87% · cargando
-```
+| Versión | Estilo | Link |
+|---|---|---|
+| **Android** | Terminal estilo Termux, con neofetch | [/android](https://bridemirci.github.io/device-check/android/) |
+| **iOS** | Minimalista, widgets de vidrio (glassmorphism) | [/ios](https://bridemirci.github.io/device-check/ios/) |
+| **macOS** | Escritorio con ventana de Terminal flotante y Dock | [/macos](https://bridemirci.github.io/device-check/macos/) |
+| **Windows** | Windows 11 Fluent: Windows Terminal, widgets y blur azul | [/windows](https://bridemirci.github.io/device-check/windows/) |
+
+Podés abrir cualquier versión desde cualquier dispositivo; los datos siempre son los del equipo que la abre. Para elegir a mano: [?elegir](https://bridemirci.github.io/device-check/?elegir).
 
 ## Qué muestra
 
 - **Modelo**, sistema y navegador
-- **Chip**, deducido de la GPU en celulares con Snapdragon
+- **Chip**: exacto en Mac con Chrome (M1, M2…); deducido de la GPU en celulares Snapdragon
+- **Versión del sistema**: distingue Windows 10 de 11 y el nombre de macOS (Sequoia, Tahoe…) en Chrome y Edge
+- **Modelo de iPhone** probable según el tamaño de pantalla
 - **GPU**, núcleos de CPU y RAM aproximada
 - **Pantalla**: resolución, frecuencia de refresco (Hz) y HDR
 - **Batería**: carga, si está cargando y tiempo estimado
