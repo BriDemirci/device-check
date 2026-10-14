@@ -1,0 +1,14 @@
+{
+  "AppVersion": "1.0.0.0",
+  "Title": "device-check · neofetch + música",
+  "Thumbnail": null,
+  "Preview": null,
+  "Desc": "Tu equipo en estilo terminal (neofetch), reloj, widget de música y visualizador de audio. Estilos Android, iOS, macOS y Windows 11.",
+  "Author": "BriDemirci",
+  "License": "MIT",
+  "Contact": "https://github.com/BriDemirci/device-check",
+  "Type": 1,
+  "FileName": "index.html",
+  "Arguments": "--audio true --system-nowplaying true",
+  "IsAbsolutePath": false
+}

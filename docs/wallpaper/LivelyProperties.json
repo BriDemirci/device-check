@@ -1,0 +1,15 @@
+{
+  "estilo": { "type": "dropdown", "value": 0, "text": "Estilo", "items": ["Automático", "Android · terminal", "iOS · vidrio", "macOS · ventana flotante", "Windows 11 · Fluent"] },
+  "lado": { "type": "dropdown", "value": 0, "text": "Lado de la terminal", "items": ["Izquierda", "Derecha"] },
+  "terminal": { "type": "checkbox", "value": true, "text": "Mostrar terminal (neofetch)" },
+  "musica": { "type": "checkbox", "value": true, "text": "Mostrar widget de música" },
+  "reloj": { "type": "checkbox", "value": true, "text": "Mostrar reloj" },
+  "visualizador": { "type": "checkbox", "value": true, "text": "Mostrar visualizador de audio" },
+  "sensibilidad": { "type": "slider", "value": 10, "min": 2, "max": 40, "step": 1, "text": "Sensibilidad del visualizador" },
+  "segundos": { "type": "checkbox", "value": false, "text": "Reloj con segundos" },
+  "h24": { "type": "checkbox", "value": true, "text": "Formato 24 horas" },
+  "opacidad": { "type": "slider", "value": 88, "min": 40, "max": 100, "step": 1, "text": "Opacidad de los widgets" },
+  "colorPortada": { "type": "checkbox", "value": true, "text": "Teñir el widget con los colores de la portada" },
+  "usarAcento": { "type": "checkbox", "value": false, "text": "Usar color de acento propio" },
+  "acento": { "type": "color", "value": "#4cc2ff", "text": "Color de acento" }
+}
