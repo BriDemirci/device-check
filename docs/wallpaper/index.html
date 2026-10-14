@@ -55,8 +55,9 @@
   .m-progreso { display: flex; align-items: center; gap: .8rem; margin-top: 1.1rem; font-size: .85rem; font-variant-numeric: tabular-nums; }
   .m-barra { flex: 1; height: .35rem; border-radius: 99px; background: color-mix(in srgb, currentColor 22%, transparent); overflow: hidden; }
   .m-barra i { display: block; height: 100%; width: 0; border-radius: inherit; background: currentColor; }
-  .m-controles { display: flex; justify-content: center; gap: 2.6rem; margin-top: .9rem; font-size: 1.5rem; }
-  .m-controles .lateral { opacity: .55; }
+  /* Estado de reproducción: solo informa, los wallpapers web no pueden controlar la música */
+  .m-controles { display: flex; justify-content: center; margin-top: .9rem; }
+  .m-estado { font-size: .8rem; font-weight: 600; padding: .3rem .8rem; border-radius: 99px; background: color-mix(in srgb, currentColor 14%, transparent); opacity: .85; }
   .m-ascii { display: none; }
 
   #demo {
@@ -229,7 +230,7 @@
       <div class="m-info"><div class="m-titulo"></div><div class="m-artista"></div></div>
     </div>
     <div class="m-progreso"><span class="m-pos">0:00</span><div class="m-barra"><i></i></div><span class="m-dur">0:00</span></div>
-    <div class="m-controles" aria-hidden="true"><span class="lateral">⏮</span><span class="m-estado">⏸</span><span class="lateral">⏭</span></div>
+    <div class="m-controles"><span class="m-estado"></span></div>
     <pre class="m-ascii"></pre>
   </section>
 </main>
@@ -357,7 +358,7 @@ function pintarMusica() {
   document.body.style.setProperty("--m-c1", usarColor ? pista.c1 : "");
   document.body.style.setProperty("--m-c2", usarColor ? (pista.c2 || pista.c1) : "");
   if (!usarColor) { document.body.style.removeProperty("--m-c1"); document.body.style.removeProperty("--m-c2"); }
-  $(".m-estado").textContent = pista.estado === "playing" ? "⏸" : "▶";
+  $(".m-estado").textContent = pista.estado === "playing" ? "▶ Reproduciendo" : pista.titulo ? "❚❚ En pausa" : "■ Sin música";
   progreso();
 }
 
