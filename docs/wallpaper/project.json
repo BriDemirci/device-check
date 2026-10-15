@@ -1,39 +1,135 @@
 {
   "title": "device-check · neofetch + música",
-  "description": "Tu equipo en estilo terminal (neofetch), reloj, widget de música y visualizador de audio. Cuatro estilos: Android, iOS, macOS y Windows 11. Activá la integración multimedia en la configuración de Wallpaper Engine para ver la canción que suena. Código: https://github.com/BriDemirci/device-check",
+  "description": "Tu equipo en estilo terminal (neofetch), reloj, widget de música y visualizador de audio. Cuatro estilos: Android, iOS, macOS y Windows 11. Activá la integración multimedia en la configuración de Wallpaper Engine para ver la canción que suena. Botones de música opcionales: corré controles/instalar.bat. Código: https://github.com/BriDemirci/device-check",
   "file": "index.html",
+  "preview": "preview.gif",
   "type": "web",
   "contentrating": "Everyone",
-  "tags": ["Technology", "Music"],
+  "tags": [
+    "Technology",
+    "Music"
+  ],
   "visibility": "public",
   "general": {
     "supportsaudioprocessing": true,
     "properties": {
       "estilo": {
-        "order": 0, "text": "Estilo", "type": "combo", "value": "auto",
+        "order": 0,
+        "text": "Estilo",
+        "type": "combo",
+        "value": "auto",
         "options": [
-          { "label": "Automático (según tu sistema)", "value": "auto" },
-          { "label": "Android · terminal", "value": "android" },
-          { "label": "iOS · vidrio", "value": "ios" },
-          { "label": "macOS · ventana flotante", "value": "macos" },
-          { "label": "Windows 11 · Fluent", "value": "windows" }
+          {
+            "label": "Automático (según tu sistema)",
+            "value": "auto"
+          },
+          {
+            "label": "Android · terminal",
+            "value": "android"
+          },
+          {
+            "label": "iOS · vidrio",
+            "value": "ios"
+          },
+          {
+            "label": "macOS · ventana flotante",
+            "value": "macos"
+          },
+          {
+            "label": "Windows 11 · Fluent",
+            "value": "windows"
+          }
         ]
       },
       "lado": {
-        "order": 1, "text": "Lado de la terminal", "type": "combo", "value": "izquierda",
-        "options": [ { "label": "Izquierda", "value": "izquierda" }, { "label": "Derecha", "value": "derecha" } ]
+        "order": 1,
+        "text": "Lado de la terminal",
+        "type": "combo",
+        "value": "izquierda",
+        "options": [
+          {
+            "label": "Izquierda",
+            "value": "izquierda"
+          },
+          {
+            "label": "Derecha",
+            "value": "derecha"
+          }
+        ]
       },
-      "terminal": { "order": 2, "text": "Mostrar terminal (neofetch)", "type": "bool", "value": true },
-      "musica": { "order": 3, "text": "Mostrar widget de música", "type": "bool", "value": true },
-      "reloj": { "order": 4, "text": "Mostrar reloj", "type": "bool", "value": true },
-      "visualizador": { "order": 5, "text": "Mostrar visualizador de audio", "type": "bool", "value": true },
-      "sensibilidad": { "order": 6, "text": "Sensibilidad del visualizador", "type": "slider", "min": 2, "max": 40, "value": 10, "editable": true },
-      "segundos": { "order": 7, "text": "Reloj con segundos", "type": "bool", "value": false },
-      "h24": { "order": 8, "text": "Formato 24 horas", "type": "bool", "value": true },
-      "opacidad": { "order": 9, "text": "Opacidad de los widgets", "type": "slider", "min": 40, "max": 100, "value": 88, "editable": true },
-      "colorportada": { "order": 10, "text": "Teñir el widget con los colores de la portada", "type": "bool", "value": true },
-      "usaracento": { "order": 11, "text": "Usar color de acento propio", "type": "bool", "value": false },
-      "acento": { "order": 12, "text": "Color de acento", "type": "color", "value": "0.298 0.761 1", "condition": "usaracento.value == true" }
+      "terminal": {
+        "order": 2,
+        "text": "Mostrar terminal (neofetch)",
+        "type": "bool",
+        "value": true
+      },
+      "musica": {
+        "order": 3,
+        "text": "Mostrar widget de música",
+        "type": "bool",
+        "value": true
+      },
+      "reloj": {
+        "order": 4,
+        "text": "Mostrar reloj",
+        "type": "bool",
+        "value": true
+      },
+      "visualizador": {
+        "order": 5,
+        "text": "Mostrar visualizador de audio",
+        "type": "bool",
+        "value": true
+      },
+      "sensibilidad": {
+        "order": 6,
+        "text": "Sensibilidad del visualizador",
+        "type": "slider",
+        "min": 2,
+        "max": 40,
+        "value": 10,
+        "editable": true
+      },
+      "segundos": {
+        "order": 7,
+        "text": "Reloj con segundos",
+        "type": "bool",
+        "value": false
+      },
+      "h24": {
+        "order": 8,
+        "text": "Formato 24 horas",
+        "type": "bool",
+        "value": true
+      },
+      "opacidad": {
+        "order": 9,
+        "text": "Opacidad de los widgets",
+        "type": "slider",
+        "min": 40,
+        "max": 100,
+        "value": 88,
+        "editable": true
+      },
+      "colorportada": {
+        "order": 10,
+        "text": "Teñir el widget con los colores de la portada",
+        "type": "bool",
+        "value": true
+      },
+      "usaracento": {
+        "order": 11,
+        "text": "Usar color de acento propio",
+        "type": "bool",
+        "value": false
+      },
+      "acento": {
+        "order": 12,
+        "text": "Color de acento",
+        "type": "color",
+        "value": "0.298 0.761 1",
+        "condition": "usaracento.value == true"
+      }
     }
   }
 }

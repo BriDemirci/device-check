@@ -10,8 +10,9 @@ python3 - <<'PY'
 import zipfile, pathlib
 origen = pathlib.Path("docs/wallpaper")
 with zipfile.ZipFile("dist/device-check-wallpaper.zip", "w", zipfile.ZIP_DEFLATED) as z:
-    for f in sorted(origen.iterdir()):
-        if f.is_file():
-            z.write(f, f"device-check-wallpaper/{f.name}")
+    for f in sorted(origen.rglob("*")):
+        # estilos.jpg es solo para el README
+        if f.is_file() and f.name != "estilos.jpg":
+            z.write(f, f"device-check-wallpaper/{f.relative_to(origen)}")
 print("dist/device-check-wallpaper.zip listo")
 PY

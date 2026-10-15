@@ -58,10 +58,22 @@
   /* Estado de reproducción: solo informa, los wallpapers web no pueden controlar la música */
   .m-controles { display: flex; justify-content: center; margin-top: .9rem; }
   .m-estado { font-size: .8rem; font-weight: 600; padding: .3rem .8rem; border-radius: 99px; background: color-mix(in srgb, currentColor 14%, transparent); opacity: .85; }
+  /* Botones reales: aparecen solo si corre el script de controles (controles/device-check-media.ps1) */
+  .m-botones { display: none; align-items: center; justify-content: center; gap: 1.6rem; }
+  .con-controles .m-botones { display: flex; }
+  .con-controles .m-estado { display: none; }
+  .m-botones button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; display: grid; place-items: center; width: 3rem; height: 3rem; border-radius: 50%; transition: background .15s, transform .1s; }
+  .m-botones button:hover { background: color-mix(in srgb, currentColor 14%, transparent); }
+  .m-botones button:active { transform: scale(.92); }
+  .m-botones svg { width: 1.5rem; height: 1.5rem; fill: currentColor; }
+  .m-botones .principal { width: 3.6rem; height: 3.6rem; }
+  .m-botones .principal svg { width: 2rem; height: 2rem; }
+  .m-botones .i-pausa, .sonando .m-botones .i-play { display: none; }
+  .sonando .m-botones .i-pausa { display: inline; }
   .m-ascii { display: none; }
 
   #demo {
-    position: fixed; z-index: 5; top: 1rem; left: 50%; transform: translateX(-50%); display: flex; gap: .4rem; align-items: center;
+    position: fixed; z-index: 5; bottom: 1rem; left: 50%; transform: translateX(-50%); display: flex; gap: .4rem; align-items: center;
     font: 12px/1 system-ui, sans-serif; background: rgba(0,0,0,.55); color: #fff; padding: .4rem .5rem .4rem .9rem; border-radius: 99px;
     backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); user-select: auto;
   }
@@ -84,7 +96,14 @@
   [data-estilo="android"] .widget { background: rgba(5,8,7,.82); border: 1px solid #1f2925; padding: 1.4rem 1.6rem; font-size: 1rem; line-height: 1.5; }
   [data-estilo="android"] .t-barra, [data-estilo="android"] .m-cab::before { color: var(--dim); }
   [data-estilo="android"] .logo, [data-estilo="android"] .filas .k, [data-estilo="android"] .filas .titulo { color: var(--acento); }
-  [data-estilo="android"] .m-cuerpo, [data-estilo="android"] .m-progreso, [data-estilo="android"] .m-controles { display: none; }
+  [data-estilo="android"] .m-cuerpo, [data-estilo="android"] .m-progreso { display: none; }
+  [data-estilo="android"] .m-controles { justify-content: flex-start; margin-top: .6rem; }
+  [data-estilo="android"] .m-estado { display: none; }
+  [data-estilo="android"] .m-botones { gap: .4rem; }
+  [data-estilo="android"] .m-botones button { width: auto; height: auto; border-radius: 0; padding: .2rem .5rem; border: 1px solid #1f2925; color: var(--acento); }
+  [data-estilo="android"] .m-botones button:hover { background: var(--acento); color: #050807; }
+  [data-estilo="android"] .m-botones svg { display: none; }
+  [data-estilo="android"] .m-botones button::after { content: attr(data-texto); }
   [data-estilo="android"] .m-ascii { display: block; }
   [data-estilo="android"] .m-cab { color: var(--dim); margin-bottom: .5rem; }
 
@@ -150,7 +169,10 @@
   [data-estilo="macos"] #musica { border-radius: 1.6rem; padding: 1.4rem; color: #fff; background: color-mix(in srgb, var(--m-c1, #5e5ce6) 55%, rgba(20,20,30,.6)); border: 1px solid rgba(255,255,255,.16); backdrop-filter: blur(30px) saturate(170%); -webkit-backdrop-filter: blur(30px) saturate(170%); box-shadow: 0 1.5rem 3.5rem rgba(0,0,0,.35); }
   [data-estilo="macos"] .m-cab { font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; opacity: .7; margin-bottom: .8rem; }
   [data-estilo="macos"] .m-portada { width: 6.4rem; height: 6.4rem; border-radius: .8rem; box-shadow: 0 .6rem 1.4rem rgba(0,0,0,.35); }
-  [data-estilo="macos"] .m-controles { display: none; }
+  [data-estilo="macos"] .m-controles { justify-content: flex-start; }
+  [data-estilo="windows"] .m-botones button { border-radius: .4rem; }
+  [data-estilo="windows"] .m-botones .principal { background: rgba(255,255,255,.1); }
+  [data-estilo="ios"] .m-botones { gap: 2.4rem; }
 
   /* =====================================================================
      Windows 11 · Fluent, bloom azul y acrílico
@@ -230,7 +252,14 @@
       <div class="m-info"><div class="m-titulo"></div><div class="m-artista"></div></div>
     </div>
     <div class="m-progreso"><span class="m-pos">0:00</span><div class="m-barra"><i></i></div><span class="m-dur">0:00</span></div>
-    <div class="m-controles"><span class="m-estado"></span></div>
+    <div class="m-controles">
+      <span class="m-estado"></span>
+      <div class="m-botones">
+        <button data-accion="prev" data-texto="prev" aria-label="Anterior"><svg viewBox="0 0 24 24"><path d="M6 5h2v14H6zM20 5v14L9.5 12z"/></svg></button>
+        <button data-accion="playpause" data-texto="play/pause" class="principal" aria-label="Reproducir o pausar"><svg viewBox="0 0 24 24"><path class="i-play" d="M7 4.5v15L19.5 12z"/><path class="i-pausa" d="M6.5 4.5h4v15h-4zm7 0h4v15h-4z"/></svg></button>
+        <button data-accion="next" data-texto="next" aria-label="Siguiente"><svg viewBox="0 0 24 24"><path d="M16 5h2v14h-2zM4 5v14l10.5-7z"/></svg></button>
+      </div>
+    </div>
     <pre class="m-ascii"></pre>
   </section>
 </main>
@@ -330,7 +359,7 @@ function pintarTerminal() {
   if (!d) return;
   const E = ESTILOS[estiloActual()], h = host();
   const quedan = ["Dispositivo", "Sistema", "Chip", "CPU", "GPU", "Memoria", "Pantalla", "Batería"];
-  const filas = DC.filas(d, bat).filter(([k, v]) => quedan.includes(k) && !/^no |no disponible|enchufado/.test(v));
+  const filas = DC.filas(d, bat).filter(([k, v]) => quedan.includes(k) && v !== "?" && !/^no |no disponible|enchufado/.test(v));
   if (pista.titulo) filas.push(["Sonando", `${pista.titulo}${pista.artista ? ` — ${pista.artista}` : ""}`]);
   const titulo = `you@${h}`;
   $(".t-prompt").innerHTML = E.prompt(h) + (estiloActual() === "windows" ? "fastfetch" : "neofetch");
@@ -359,6 +388,7 @@ function pintarMusica() {
   document.body.style.setProperty("--m-c2", usarColor ? (pista.c2 || pista.c1) : "");
   if (!usarColor) { document.body.style.removeProperty("--m-c1"); document.body.style.removeProperty("--m-c2"); }
   $(".m-estado").textContent = pista.estado === "playing" ? "▶ Reproduciendo" : pista.titulo ? "❚❚ En pausa" : "■ Sin música";
+  $("#musica").classList.toggle("sonando", pista.estado === "playing");
   progreso();
 }
 
@@ -456,7 +486,7 @@ function bucle(t) {
   requestAnimationFrame(bucle);
   if (pausado || t - ultimo < 1000 / cfg.fps) return;
   ultimo = t;
-  if (fuente === "demo") audioDemo(t);
+  if (fuente === "demo" && pista.estado === "playing") audioDemo(t);
   else for (let i = 0; i < BANDAS; i++) audio[i] *= .9;   // cae suave si deja de llegar audio
   dibujar();
   if (estiloActual() === "android" || pista.estado === "playing") progreso();
@@ -544,13 +574,45 @@ window.livelyCurrentTrack = datos => {
   pintarMusica(); pintarTerminal();
 };
 
+/* ---------- Controles de música (script opcional de PowerShell) ----------
+   Los wallpapers web no pueden controlar la música. controles/device-check-media.ps1 escucha en
+   localhost y aprieta las teclas multimedia de Windows; si no está corriendo, se muestra solo el estado. */
+
+const CONTROLES = "http://localhost:8977";
+let hayControles = false;
+
+async function buscarControles() {
+  if (fuente === "demo") return;
+  try {
+    const ctl = new AbortController();
+    setTimeout(() => ctl.abort(), 800);
+    const r = await fetch(`${CONTROLES}/ping`, { signal: ctl.signal, cache: "no-store" });
+    hayControles = (await r.json()).app === "device-check";
+  } catch { hayControles = false; }
+  $("#musica").classList.toggle("con-controles", hayControles);
+}
+
+document.querySelectorAll(".m-botones button").forEach(b => b.addEventListener("click", async () => {
+  if (fuente === "demo") {   // en la vista previa los botones manejan la canción de ejemplo
+    pista.pos = b.dataset.accion === "playpause" ? posicionActual() : 0;
+    pista.marca = performance.now();
+    if (b.dataset.accion === "playpause") pista.estado = pista.estado === "playing" ? "paused" : "playing";
+    pintarMusica();
+    return;
+  }
+  try {
+    await fetch(`${CONTROLES}/${b.dataset.accion}`, { method: "POST", headers: { "X-Device-Check": "1" }, body: "" });
+  } catch { hayControles = false; $("#musica").classList.remove("con-controles"); }
+}));
+
 /* ---------- Vista previa en el navegador ---------- */
 
 function iniciarDemo() {
   if (fuente) return;
   fuente = "demo";
   Object.assign(pista, { titulo: "Lo-fi para programar", artista: "device-check · vista previa", estado: "playing", pos: 47, dur: 214, marca: performance.now(), c1: "#7b5cff", c2: "#ff5f9e" });
-  $("#demo").hidden = false;
+  $("#demo").hidden = params.has("captura");   // ?captura: sin la píldora, para generar la preview
+  $("#musica").classList.add("con-controles");
   pintarMusica(); pintarTerminal();
 }
 function ocultarDemo() { $("#demo").hidden = true; }
@@ -575,6 +637,8 @@ document.querySelectorAll("#demo button").forEach(b => b.addEventListener("click
   aplicar();
   setInterval(reloj, 1000);
   setTimeout(iniciarDemo, 1500);   // si en 1,5 s no habló Wallpaper Engine ni Lively, mostramos la vista previa
+  setTimeout(buscarControles, 2000);
+  setInterval(buscarControles, 15000);
   requestAnimationFrame(bucle);
 })();
 </script>

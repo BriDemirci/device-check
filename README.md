@@ -52,6 +52,8 @@ Cada parte respeta el estilo elegido: Android, iOS, macOS o Windows 11.
 
 👉 [Vista previa en el navegador](https://bridemirci.github.io/device-check/wallpaper/) (con música de ejemplo)
 
+![Los cuatro estilos del wallpaper](docs/wallpaper/estilos.jpg)
+
 ### Wallpaper Engine
 1. Descargá `device-check-wallpaper.zip` de [Releases](https://github.com/BriDemirci/device-check/releases/latest) y descomprimilo.
 2. En Wallpaper Engine: **Abrir wallpaper → Abrir desde archivo** y elegí `index.html` de esa carpeta.
@@ -61,7 +63,17 @@ Cada parte respeta el estilo elegido: Android, iOS, macOS o Windows 11.
 ### Lively Wallpaper (gratis)
 Arrastrá el `.zip` a la ventana de [Lively](https://www.rocksdanister.com/lively/). Las mismas opciones aparecen en "Personalizar".
 
-> El widget de música **muestra** lo que suena; los wallpapers no pueden pausar ni cambiar de canción.
+### Botones de música (opcional)
+
+Los wallpapers web solo pueden **leer** qué canción suena, no controlarla. Para tener botones de anterior, pausa y siguiente:
+
+1. Abrí la carpeta `controles` del wallpaper.
+2. Doble clic en **`instalar.bat`**. Queda corriendo en segundo plano y arranca solo con Windows.
+3. En unos segundos aparecen los botones en el widget de música.
+
+El script (`device-check-media.ps1`) es PowerShell, que ya viene con Windows, así que no hay que instalar nada. Hace una sola cosa: cuando tocás un botón, aprieta las teclas multimedia de Windows. Escucha solo en `localhost` y rechaza pedidos de páginas web. Para sacarlo: **`desinstalar.bat`**.
+
+Para que los clics lleguen al wallpaper, el widget no tiene que quedar tapado por íconos del escritorio.
 
 ## Modo avanzado: con Termux
 
